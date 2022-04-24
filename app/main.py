@@ -18,12 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QAbstractEventDispatcher
 from pyqtkeybind import keybinder
 
-from MainWindow import MainWindow, WinEventFilter
+from MainWindow import WinEventFilter, SystemTrayApp
 from Trackers import Tracker
 from utils.config import config
 
@@ -32,9 +32,10 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setApplicationName("Poricom")
     app.setWindowIcon(QIcon(config["LOGO"]))
+    app.setQuitOnLastWindowClosed(False)
 
     tracker = Tracker()
-    widget = MainWindow(parent=None, tracker=tracker)
+    widget = SystemTrayApp(parent=None, tracker=tracker)
 
     styles = config["STYLES_DEFAULT"]
     with open(styles, 'r') as fh:
@@ -42,8 +43,10 @@ if __name__ == '__main__':
 
     keybinder.init()
     previousShortcut = config["SHORTCUT"]["captureExternal"]
+
+    # WinId might be incorrect here
     keybinder.register_hotkey(
-        widget.winId(), config["SHORTCUT"]["captureExternal"], widget.captureExternal)
+       0, config["SHORTCUT"]["captureExternal"], widget.captureExternal)
     winEventFilter = WinEventFilter(keybinder)
     eventDispatcher = QAbstractEventDispatcher.instance()
     eventDispatcher.installNativeEventFilter(winEventFilter)

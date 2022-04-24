@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import (Qt, QTimer, QThreadPool, pyqtSlot, QPoint)
 from PyQt5.QtCore import (Qt, QRect, QSize, QTimer, QThreadPool, pyqtSlot)
-from PyQt5.QtWidgets import (
+from PyQt5.QtWidgets import (QMainWindow,
     QRubberBand, QGraphicsOpacityEffect, QApplication, QGraphicsView, QLabel)
 
 from Workers import BaseWorker
@@ -112,3 +112,15 @@ class FullScreen(BaseCanvas):
     def mouseReleaseEvent(self, event):
         BaseCanvas.mouseReleaseEvent(self, event)
         self.parent.close()
+
+
+class ExternalWindow(QMainWindow):
+    def __init__(self, tracker):
+        super().__init__()
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.setStyleSheet("border:0px; margin:0px")
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_NoSystemBackground, True)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+
+        self.setCentralWidget(FullScreen(self, tracker))

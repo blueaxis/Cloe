@@ -47,8 +47,6 @@ class RibbonTab(QWidget):
             self.loadButtonConfig(funcName, funcConfig)
             self.layout.addWidget(self.buttonList[-1],
                                   alignment=getattr(Qt, funcConfig["align"]))
-        # self.layout.addStretch()
-        # self.layout.addWidget(PageNavigator(self.parent))
 
     def loadButtonConfig(self, buttonName, buttonConfig):
 
@@ -83,26 +81,6 @@ class RibbonTab(QWidget):
         else:
             self.buttonList[-1].clicked.connect(
                 getattr(self.parent, 'poricomNoop'))
-
-
-class PageNavigator(RibbonTab):
-
-    def __init__(self, parent=None, tracker=None):
-        super(QWidget, self).__init__()
-        self.parent = parent
-        self.tracker = tracker
-        self.buttonList = []
-
-        self.layout = QGridLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        for funcName, funcConfig in config["MODE_FUNCS"].items():
-            self.loadButtonConfig(funcName, funcConfig)
-
-        self.layout.addWidget(self.buttonList[0], 0, 0, 1, 1)
-        self.layout.addWidget(self.buttonList[1], 1, 0, 1, 1)
-        self.layout.addWidget(self.buttonList[2], 0, 1, 1, 2)
-        self.layout.addWidget(self.buttonList[3], 1, 1, 1, 1)
-        self.layout.addWidget(self.buttonList[4], 1, 2, 1, 1)
 
 
 class Ribbon(QTabWidget):

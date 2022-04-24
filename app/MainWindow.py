@@ -22,15 +22,16 @@ from time import sleep
 
 import toml
 from manga_ocr import MangaOcr
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import (Qt, QAbstractNativeEventFilter, QThreadPool)
-from PyQt5.QtWidgets import (
+from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QWidgetAction,
     QVBoxLayout, QWidget, QMainWindow, QApplication)
 
 
-from utils.config import config
+from utils.config import config, saveOnClose
 from Workers import BaseWorker
 from Ribbon import (Ribbon)
-from Views import (FullScreen)
+from Views import (ExternalWindow)
 from Popups import (ShortcutPicker, FontPicker, PickerPopup, MessagePopup)
 
 
@@ -44,41 +45,25 @@ class WinEventFilter(QAbstractNativeEventFilter):
         return ret, 0
 
 
-class ExternalWindow(QMainWindow):
-    def __init__(self, tracker):
-        super().__init__()
-        self.layout().setContentsMargins(0, 0, 0, 0)
-        self.setStyleSheet("border:0px; margin:0px")
-        self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_NoSystemBackground, True)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
-
-        self.setCentralWidget(FullScreen(self, tracker))
-
-
-class MainWindow(QMainWindow):
+class SystemTrayApp(QSystemTrayIcon):
 
     def __init__(self, parent=None, tracker=None):
-        super(QWidget, self).__init__(parent)
+        icon = QIcon("./assets/images/icons/logo.ico")
+        QSystemTrayIcon.__init__(self, icon, parent)
+
+        # State trackers and configurations
         self.tracker = tracker
         self.config = config
-
-        self.vLayout = QVBoxLayout()
-        self.ribbon = Ribbon(self, self.tracker)
-        self.vLayout.addWidget(self.ribbon)
-        _mainWidget = QWidget()
-        _mainWidget.setLayout(self.vLayout)
-        self.setCentralWidget(_mainWidget)
-
         self.threadpool = QThreadPool()
 
-    # def closeEvent(self, event):
-    #     try:
-    #         rmtree("./poricom_cache")
-    #     except FileNotFoundError:
-    #         pass
-    #     saveOnClose(self.config)
-    #     return QMainWindow.closeEvent(self, event)
+        # Menu
+        menu = QMenu(parent)
+        self.setContextMenu(menu)
+
+        # Menu Actions
+        settingsAction = menu.addAction("Settings")
+        settingsAction.triggered.connect(self.openSettings)
+        menu.addAction("Exit", QApplication.instance().exit)
 
     def loadModel(self):
         def loadModelHelper(tracker):
@@ -108,53 +93,78 @@ class MainWindow(QMainWindow):
             usingMangaOCR, connected = typeConnectionTuple
             modelName = "MangaOCR" if usingMangaOCR else "Tesseract"
             if connected:
-                MessagePopup(
+                self.showMessage(
                     f"{modelName} model loaded",
                     f"You are now using the {modelName} model for Japanese text detection."
-                ).exec()
+                )
 
             elif not connected:
-                MessagePopup(
+                self.showMessage(
                     "Connection Error",
                     "Please try again or make sure your Internet connection is on."
-                ).exec()
+                )
 
-        confirmation = MessagePopup(
+        self.showMessage(
             "Please wait",
             "Loading the MangaOCR model ..."
         )
 
         worker = BaseWorker(loadModelHelper, self.tracker)
-        worker.signals.finished.connect(confirmation.close)
         worker.signals.result.connect(modelLoadedConfirmation)
         self.threadpool.start(worker)
-        confirmation.exec()
 
+    def captureExternal(self):
+
+        if self.tracker.ocrModel == None:
+            self.showMessage(
+                "MangaOCR model not yet loaded",
+                "Please wait until the MangaOCR model is loaded."
+            )
+            return
+        externalWindow = ExternalWindow(self.tracker)
+        externalWindow.showFullScreen()
+
+    # BUG: Menu is closing when another event is triggered
+    def openSettings(self):
+        SettingsMenu(self, self.tracker).show()
+
+class SettingsMenu(QWidget):
+
+    def __init__(self, parent=None, tracker=None):
+        super(QWidget, self).__init__()
+        self._parent = parent
+        self.tracker = tracker
+        self.config = parent.config
+
+        self.vLayout = QVBoxLayout()
+        self.ribbon = Ribbon(self, self.tracker)
+        self.vLayout.addWidget(self.ribbon)
+        self.setLayout(self.vLayout)
+
+    # Save configurations on close
+    def closeEvent(self, event):
+        # try:
+        #     rmtree("./poricom_cache")
+        # except FileNotFoundError:
+        #     pass
+        saveOnClose(self.config)
+        self._parent.config = self.config
+        return super().closeEvent(event)
+
+    # Noop
     def poricomNoop(self):
         MessagePopup(
             "WIP",
             "This function is not yet implemented."
         ).exec()
 
-# ------------------------------ Help Functions ------------------------------ #
+# ------------------------------- Help Message ------------------------------- #
 
     def captureExternalHelper(self):
         self.showMinimized()
         sleep(0.5)
         if self.isMinimized():
-            self.captureExternal()
-
-    def captureExternal(self):
-
-        if self.tracker.ocrModel == None:
-            MessagePopup(
-            "MangaOCR model not yet loaded",
-            "Please wait until the MangaOCR model is loaded."
-            ).exec()
-            return
-
-        externalWindow = ExternalWindow(self.tracker)
-        externalWindow.showFullScreen()
+            self._parent.captureExternal()
 
 # ---------------------------------- Settings --------------------------------- #
 

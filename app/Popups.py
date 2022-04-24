@@ -201,7 +201,7 @@ class ShortcutPicker(BasePicker):
         tooltip = f"{self.parent.config['SHORTCUT'][f'{keyName}Tip']}{modifierText}{keyText}."
         self.parent.config["SHORTCUT"][keyName] = f"{modifierText}{keyText}"
         self.parent.config["SHORTCUT"][f"{keyName}Key"] = keyText
-        self.parent.config["TBAR_FUNCS"]["FILE"][f"{keyName}Helper"]["helpMsg"] = tooltip
+        self.parent.config["TBAR_FUNCS"]["SETTINGS"][f"{keyName}Helper"]["helpMsg"] = tooltip
 
     def applyChanges(self):
         selectedModifier = self.pickTop.currentText().strip() + "+"
