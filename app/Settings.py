@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
 from PyQt5.QtGui import (QColor, QPalette, QBrush, QPainter, QPen, QFont)
 from PyQt5.QtCore import (Qt, QSize, QSettings)
 from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorDialog, QFontDialog,
@@ -25,9 +24,9 @@ from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorD
 
 class CustomBand(QRubberBand):
 
-    def __init__(self, shape, parent, color=Qt.blue, thickness=2):
+    def __init__(self, shape, parent, borderColor=Qt.blue, thickness=2):
         super().__init__(shape, parent)
-        self.setBorder(color, thickness)
+        self.setBorder(borderColor, thickness)
     
     def setBorder(self, color, thickness):
         self._borderColor = color
@@ -54,15 +53,15 @@ class ViewSettings(QWidget):
         self._defaults = {
             # Preview
             'previewFont': QFont("Arial", 16),
-            'previewColor': "rgba(239, 240, 241, 1)",
-            'previewBackground': "rgba(72, 75, 106, 0.9)",
-            'previewPadding': "0.25em",
+            'previewColor': QColor(239, 240, 241, 255),
+            'previewBackground': QColor(72, 75, 106, 230),
+            'previewPadding': 10,
 
             # Selection rubberband
             'selectionBorderColor': QColor(0, 128, 255, 60),
             'selectionBorderThickness': 2,
             'selectionBackground': QColor(0, 128, 255, 255),
-            'windowColor': "rgba(255, 255, 255, 0.01)"
+            'windowColor': QColor(255, 255, 255, 3)
         }
         self._properties = {
 
@@ -81,7 +80,7 @@ class ViewSettings(QWidget):
 
         self.setLayout(QGridLayout(self))
         # self.layout().setContentsMargins(0, 0, 0, 0)
-        self.initSettings()
+        self.restoreSettings()
         self.initButtons()
         self.initLiveView()
         self.updateLiveView()
@@ -94,6 +93,24 @@ class ViewSettings(QWidget):
         h = self._liveView.height() - 2*y
         self._rubberBand.setGeometry(x, y, w, h)
         return super().resizeEvent(event)
+
+    def restoreSettings(self):
+        for propName, propType in self._properties.items():
+            try:
+                if propType == 'rgba':
+                    prop = self.settings.value(propName)
+                    # prop = f"rgba({_c.red()}, {_c.green()}, {_c.blue()}, {_c.alpha()})"
+                elif propType == 'color':
+                    prop = self.settings.value(propName)
+                elif propType == 'dist':
+                    prop = int(self.settings.value(propName))
+                elif propType == 'font':
+                    prop = self.settings.value(propName)
+                if prop is not None:
+                    setattr(self, propName, prop)
+                else: raise TypeError
+            except:
+                setattr(self, propName, self._defaults[propName])
 
     def initButtons(self):
 
@@ -117,6 +134,7 @@ class ViewSettings(QWidget):
         _previewColor.clicked.connect(lambda: self.getColor_('previewColor'))        
         _previewBackground.clicked.connect(lambda: self.getColor_('previewBackground'))
         _previewFont.clicked.connect(lambda: self.getFont_('previewFont'))
+        _previewPadding.clicked.connect(lambda: self.getInt_('previewPadding'))
 
 # --------------------------- Selection Rubberband --------------------------- #        
 
@@ -137,6 +155,7 @@ class ViewSettings(QWidget):
         # Signals and Slots
         _selectionBorderColor.clicked.connect(lambda: self.getColor_('selectionBorderColor'))
         _selectionBackground.clicked.connect(lambda: self.getColor_('selectionBackground'))
+        _selectionBorderThickness.clicked.connect(lambda: self.getInt_('selectionBorderThickness'))
         _windowColor.clicked.connect(lambda: self.getColor_('windowColor'))
 
     def initLiveView(self):
@@ -157,30 +176,23 @@ class ViewSettings(QWidget):
         self._rubberBand.show()
         self.layout().addWidget(self._liveView, 2, 0, -1, -1)
 
-    def initSettings(self):
-        for propName, propType in self._properties.items():
-            try:
-                if propType == 'rgba':
-                    _c = self.settings.value(propName)
-                    prop = f"rgba({_c.red()}, {_c.green()}, {_c.blue()}, {_c.alpha()})"
-                elif propType == 'color':
-                    prop = self.settings.value(propName)
-                elif propType == 'dist':
-                    pass
-                elif propType == 'font':
-                    prop = self.settings.value(propName)
-                if prop is not None: setattr(self, propName, self._defaults[propName])
-                else: raise TypeError
-            except:
-                setattr(self, propName, self._defaults[propName])
-
     def updateLiveView(self):
-        self.previewPadding = '0.25em'
+
+        def colorToRGBA(objectName):
+            _c = getattr(self, objectName)
+            if self._properties[objectName] == 'rgba':
+                color = f"rgba({_c.red()}, {_c.green()}, {_c.blue()}, {_c.alpha()})"
+                return color
+
+        _previewPadding = f"{self.previewPadding}px"
+        _previewColor = colorToRGBA('previewColor')
+        _previewBackground = colorToRGBA('previewBackground')
+        _windowColor = colorToRGBA('windowColor')
         styles = f"""
             QLabel#previewText {{ 
-                color: {self.previewColor};
-                background-color: {self.previewBackground}; 
-                padding: {self.previewPadding};
+                color: {_previewColor};
+                background-color: {_previewBackground}; 
+                padding: {_previewPadding};
                 font-family: {self.previewFont.family()};
                 font-size: {self.previewFont.pointSize()}pt;
                 margin-top: 0.02em;
@@ -188,12 +200,12 @@ class ViewSettings(QWidget):
             }}
         """
         self.setStyleSheet(styles)
-        self._previewText.setFont(self.previewFont)
 
+        # BUG: Rubberband not updating on start
         palette = QPalette()
         palette.setBrush(QPalette.Highlight, QBrush(self.selectionBackground))
+        self._rubberBand.setPalette(palette)
         self._rubberBand.setBorder(self.selectionBorderColor, self.selectionBorderThickness)
-        self._rubberBand.setPalette(palette) 
    
     def getColor_(self, objectName):
         try:
@@ -201,14 +213,11 @@ class ViewSettings(QWidget):
         except:
             pass
         if initialColor is None:
-            initialColor = QColor()
-        _c = QColorDialog().getColor(initial=initialColor, options=QColorDialog.ShowAlphaChannel)
-        if _c.isValid():
-            self.settings.setValue(objectName, _c)
-            if self._properties[objectName] == 'rgba':
-                color = f"rgba({_c.red()}, {_c.green()}, {_c.blue()}, {_c.alpha()})"
-                setattr(self, objectName, color)
-            else: setattr(self, objectName, _c)
+            initialColor = self._defaults[objectName]
+        color = QColorDialog().getColor(initial=initialColor, options=QColorDialog.ShowAlphaChannel)
+        if color.isValid():
+            self.settings.setValue(objectName, color)
+            setattr(self, objectName, color)
             self.updateLiveView()
 
     def getFont_(self, objectName):
@@ -217,11 +226,32 @@ class ViewSettings(QWidget):
         except:
             pass
         if initialFont is None:
-            initialFont = QFont()
+            initialFont = self._defaults[objectName]
         font, accepted = QFontDialog().getFont(initialFont)
         if accepted:
-            self.previewFont = font
+            setattr(self, objectName, font)
             self.settings.setValue(objectName, font)
+            self.updateLiveView()
+
+    def getInt_(self, objectName):
+        try:
+            initialInt = int(self.settings.value(objectName))
+        except:
+            pass
+        if initialInt is None:
+            initialInt = self._defaults[objectName]
+        i, accepted = QInputDialog.getInt(
+            self,
+            "Margin/Padding Settings",
+            f"Enter a value between 5 and 50:",
+            value=initialInt,
+            min=5,
+            max=50,
+            flags=Qt.CustomizeWindowHint | Qt.WindowTitleHint)
+
+        if accepted:
+            setattr(self, objectName, i)
+            self.settings.setValue(objectName, i)
             self.updateLiveView()
 
 
