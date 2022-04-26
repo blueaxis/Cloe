@@ -32,6 +32,7 @@ from utils.config import config, saveOnClose
 from Workers import BaseWorker
 from Ribbon import (Ribbon)
 from Views import (ExternalWindow)
+from Settings import SettingsMenu
 from Popups import (ShortcutPicker, FontPicker, PickerPopup, MessagePopup)
 
 
@@ -61,8 +62,7 @@ class SystemTrayApp(QSystemTrayIcon):
         self.setContextMenu(menu)
 
         # Menu Actions
-        settingsAction = menu.addAction("Settings")
-        settingsAction.triggered.connect(self.openSettings)
+        menu.addAction("Settings", self.openSettings)
         menu.addAction("Exit", QApplication.instance().exit)
 
     def loadModel(self):
@@ -124,67 +124,67 @@ class SystemTrayApp(QSystemTrayIcon):
         externalWindow = ExternalWindow(self.tracker)
         externalWindow.showFullScreen()
 
-    # BUG: Menu is closing when some event in MangaOCR is triggered
-    # Might be solvable using threads?
     def openSettings(self):
-        SettingsMenu(self, self.tracker).show()
+        # TODO: Destroy settings menu when closed 
+        self.settingsMenu = SettingsMenu()
+        self.settingsMenu.show()
 
-class SettingsMenu(QWidget):
+# class SettingsMenu(QWidget):
 
-    def __init__(self, parent=None, tracker=None):
-        super(QWidget, self).__init__()
-        self._parent = parent
-        self.tracker = tracker
-        self.config = parent.config
+#     def __init__(self, parent=None, tracker=None):
+#         super(QWidget, self).__init__()
+#         self._parent = parent
+#         self.tracker = tracker
+#         self.config = parent.config
 
-        self.vLayout = QVBoxLayout()
-        self.ribbon = Ribbon(self, self.tracker)
-        self.vLayout.addWidget(self.ribbon)
-        self.setLayout(self.vLayout)
+#         self.vLayout = QVBoxLayout()
+#         self.ribbon = Ribbon(self, self.tracker)
+#         self.vLayout.addWidget(self.ribbon)
+#         self.setLayout(self.vLayout)
 
-    # Save configurations on close
-    def closeEvent(self, event):
-        saveOnClose(self.config)
-        self._parent.config = self.config
-        return super().closeEvent(event)
+#     # Save configurations on close
+#     def closeEvent(self, event):
+#         saveOnClose(self.config)
+#         self._parent.config = self.config
+#         return super().closeEvent(event)
 
-    # Noop
-    def poricomNoop(self):
-        MessagePopup(
-            "WIP",
-            "This function is not yet implemented."
-        ).exec()
+#     # Noop
+#     def poricomNoop(self):
+#         MessagePopup(
+#             "WIP",
+#             "This function is not yet implemented."
+#         ).exec()
 
-# ------------------------------- Help Message ------------------------------- #
+# # ------------------------------- Help Message ------------------------------- #
 
-    def captureExternalHelper(self):
-        self.showMinimized()
-        sleep(0.5)
-        if self.isMinimized():
-            self._parent.captureExternal()
+#     def captureExternalHelper(self):
+#         self.showMinimized()
+#         sleep(0.5)
+#         if self.isMinimized():
+#             self._parent.captureExternal()
 
-# ---------------------------------- Settings --------------------------------- #
+# # ---------------------------------- Settings --------------------------------- #
 
-    def modifyHotkeys(self):
-        confirmation = PickerPopup(ShortcutPicker(self, self.tracker))
-        ret = confirmation.exec()
-        if ret:
-            MessagePopup(
-                "Shortcut Remapped",
-                "Close the app to apply changes."
-            ).exec()
+#     def modifyHotkeys(self):
+#         confirmation = PickerPopup(ShortcutPicker(self, self.tracker))
+#         ret = confirmation.exec()
+#         if ret:
+#             MessagePopup(
+#                 "Shortcut Remapped",
+#                 "Close the app to apply changes."
+#             ).exec()
 
-    def modifyFontSettings(self):
-        confirmation = PickerPopup(FontPicker(self, self.tracker))
-        ret = confirmation.exec()
+#     def modifyFontSettings(self):
+#         confirmation = PickerPopup(FontPicker(self, self.tracker))
+#         ret = confirmation.exec()
 
-        if ret:
-            app = QApplication.instance()
-            if app is None:
-                raise RuntimeError("No Qt Application found.")
+#         if ret:
+#             app = QApplication.instance()
+#             if app is None:
+#                 raise RuntimeError("No Qt Application found.")
 
-            with open(config["STYLES_DEFAULT"], 'r') as fh:
-                app.setStyleSheet(fh.read())
+#             with open(config["STYLES_DEFAULT"], 'r') as fh:
+#                 app.setStyleSheet(fh.read())
 
-    def toggleLogging(self):
-        self.tracker.switchWriteMode()
+#     def toggleLogging(self):
+#         self.tracker.switchWriteMode()

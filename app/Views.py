@@ -17,15 +17,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import (Qt, QTimer, QThreadPool, pyqtSlot, QPoint)
+from PyQt5.QtGui import (QPixmap, QPalette, QBrush, QColor, QFont)
+from PyQt5.QtCore import (Qt, QTimer, QThreadPool, pyqtSlot, QPoint, QSettings)
 from PyQt5.QtCore import (Qt, QRect, QSize, QTimer, QThreadPool, pyqtSlot)
 from PyQt5.QtWidgets import (QMainWindow,
     QRubberBand, QGraphicsOpacityEffect, QApplication, QGraphicsView, QLabel)
 
 from Workers import BaseWorker
+from Settings import ViewSettings, CustomBand
 from utils.image_io import logText, pixboxToText
-
 
 class BaseCanvas(QGraphicsView):
 
@@ -40,7 +40,7 @@ class BaseCanvas(QGraphicsView):
         self._timer.timeout.connect(self.rubberBandStopped)
 
         self._initialPoint = QPoint()
-        self._rubberBand = QRubberBand(QRubberBand.Rectangle, self.parent)
+        self._rubberBand = CustomBand(CustomBand.Rectangle, self.parent)
 
         self._canvasText = QLabel("", self.parent, Qt.WindowStaysOnTopHint)
         self._canvasText.setWordWrap(True)
@@ -108,6 +108,88 @@ class FullScreen(BaseCanvas):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setGraphicsEffect(QGraphicsOpacityEffect(opacity=0.05))
+        self.restoreSettings()
+        self.updateLiveView()
+
+    # TODO: Try to inherit these from ViewSettings
+    # The mouse click event doesn't work when inheriting from ViewSettings
+    def restoreSettings(self):
+        self.settings = QSettings("./utils/MangaOCR.ini", QSettings.IniFormat)
+        # Properties and defaults
+        self._defaults = {
+            # Preview
+            'previewFont': QFont("Arial", 16),
+            'previewColor': QColor(239, 240, 241, 255),
+            'previewBackground': QColor(72, 75, 106, 230),
+            'previewPadding': 10,
+            # Selection rubberband
+            'selectionBorderColor': QColor(0, 128, 255, 60),
+            'selectionBorderThickness': 2,
+            'selectionBackground': QColor(0, 128, 255, 255),
+            'windowColor': QColor(255, 255, 255, 3)
+        }
+        self._properties = {
+            # Preview
+            'previewFont': 'font',
+            'previewColor': 'rgba',
+            'previewBackground': 'rgba',
+            'previewPadding': 'dist',
+            # Selection rubberband
+            'selectionBorderColor': 'color',
+            'selectionBorderThickness': 'dist',
+            'selectionBackground': 'color',
+            'windowColor': 'rgba'
+        }
+        for propName, propType in self._properties.items():
+            try:
+                if propType == 'rgba':
+                    prop = self.settings.value(propName)
+                elif propType == 'color':
+                    prop = self.settings.value(propName)
+                elif propType == 'dist':
+                    prop = int(self.settings.value(propName))
+                elif propType == 'font':
+                    prop = self.settings.value(propName)
+                if prop is not None:
+                    setattr(self, propName, prop)
+                    self.settings.setValue(propName, prop)
+                else: raise TypeError
+            except:
+                setattr(self, propName, self._defaults[propName])
+                self.settings.setValue(propName, self._defaults[propName])
+
+    def updateLiveView(self):
+
+        def colorToRGBA(objectName):
+            _c = getattr(self, objectName)
+            if self._properties[objectName] == 'rgba':
+                color = f"rgba({_c.red()}, {_c.green()}, {_c.blue()}, {_c.alpha()})"
+                return color
+
+        _previewPadding = f"{self.previewPadding}px"
+        _previewColor = colorToRGBA('previewColor')
+        _previewBackground = colorToRGBA('previewBackground')
+        # TODO: Window color is not set properly since parent color is different
+        # BUG: Styles are not being applied to liveView object
+        _windowColor = colorToRGBA('windowColor')
+        styles = f"""
+            QLabel#canvasText {{ 
+                color: {_previewColor};
+                background-color: {_previewBackground}; 
+                padding: {_previewPadding};
+                font-family: {self.previewFont.family()};
+                font-size: {self.previewFont.pointSize()}pt;
+                margin-top: 0.02em;
+                margin-left: 0.02em;
+            }}
+        """
+        self.parent.setStyleSheet(styles)
+
+        # BUG: Rubberband not updating on start
+        palette = QPalette()
+        palette.setBrush(QPalette.Highlight, QBrush(self.selectionBackground))
+        self._rubberBand.setPalette(palette)
+        self._rubberBand.setBorder(self.selectionBorderColor, self.selectionBorderThickness)
 
     def mouseReleaseEvent(self, event):
         BaseCanvas.mouseReleaseEvent(self, event)

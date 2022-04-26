@@ -47,8 +47,62 @@ class ViewSettings(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-        self.settings = QSettings("./utils/MangaOCR.ini", QSettings.IniFormat)
 
+        self.setLayout(QGridLayout(self))
+        self.restoreSettings()
+        self.initButtons()
+        self.initLiveView()
+        self.updateLiveView()
+
+# ----------------------------------- View Updates ----------------------------------- #
+
+    def resizeEvent(self, event):
+        if self._liveView is not None:
+            # Resize rubber band when window size is changed
+            w = 0.35 * self._liveView.width() 
+            y = 0.05 * self._liveView.height()
+            x = self._liveView.width() - w - y
+            h = self._liveView.height() - 2*y
+            self._rubberBand.setGeometry(x, y, w, h)
+        return super().resizeEvent(event)
+
+    def updateLiveView(self):
+
+        def colorToRGBA(objectName):
+            _c = getattr(self, objectName)
+            if self._properties[objectName] == 'rgba':
+                color = f"rgba({_c.red()}, {_c.green()}, {_c.blue()}, {_c.alpha()})"
+                return color
+
+        _previewPadding = f"{self.previewPadding}px"
+        _previewColor = colorToRGBA('previewColor')
+        _previewBackground = colorToRGBA('previewBackground')
+        # TODO: Window color is not set properly since parent color is different
+        # BUG: Styles are not being applied to liveView object
+        _windowColor = colorToRGBA('windowColor')
+        styles = f"""
+            QLabel#previewText {{ 
+                color: {_previewColor};
+                background-color: {_previewBackground}; 
+                padding: {_previewPadding};
+                font-family: {self.previewFont.family()};
+                font-size: {self.previewFont.pointSize()}pt;
+                margin-top: 0.02em;
+                margin-left: 0.02em;
+            }}
+        """
+        self.setStyleSheet(styles)
+
+        # BUG: Rubberband not updating on start
+        palette = QPalette()
+        palette.setBrush(QPalette.Highlight, QBrush(self.selectionBackground))
+        self._rubberBand.setPalette(palette)
+        self._rubberBand.setBorder(self.selectionBorderColor, self.selectionBorderThickness)
+
+# --------------------------- Settings and Initializations --------------------------- #
+
+    def restoreSettings(self):
+        self.settings = QSettings("./utils/MangaOCR.ini", QSettings.IniFormat)
         # Properties and defaults
         self._defaults = {
             # Preview
@@ -56,7 +110,6 @@ class ViewSettings(QWidget):
             'previewColor': QColor(239, 240, 241, 255),
             'previewBackground': QColor(72, 75, 106, 230),
             'previewPadding': 10,
-
             # Selection rubberband
             'selectionBorderColor': QColor(0, 128, 255, 60),
             'selectionBorderThickness': 2,
@@ -64,42 +117,21 @@ class ViewSettings(QWidget):
             'windowColor': QColor(255, 255, 255, 3)
         }
         self._properties = {
-
             # Preview
             'previewFont': 'font',
             'previewColor': 'rgba',
             'previewBackground': 'rgba',
             'previewPadding': 'dist',
-
             # Selection rubberband
             'selectionBorderColor': 'color',
             'selectionBorderThickness': 'dist',
             'selectionBackground': 'color',
             'windowColor': 'rgba'
         }
-
-        self.setLayout(QGridLayout(self))
-        # self.layout().setContentsMargins(0, 0, 0, 0)
-        self.restoreSettings()
-        self.initButtons()
-        self.initLiveView()
-        self.updateLiveView()
-
-    def resizeEvent(self, event):
-        # Resize rubber band when window size is changed
-        w = 0.35 * self._liveView.width() 
-        y = 0.05 * self._liveView.height()
-        x = self._liveView.width() - w - y
-        h = self._liveView.height() - 2*y
-        self._rubberBand.setGeometry(x, y, w, h)
-        return super().resizeEvent(event)
-
-    def restoreSettings(self):
         for propName, propType in self._properties.items():
             try:
                 if propType == 'rgba':
                     prop = self.settings.value(propName)
-                    # prop = f"rgba({_c.red()}, {_c.green()}, {_c.blue()}, {_c.alpha()})"
                 elif propType == 'color':
                     prop = self.settings.value(propName)
                 elif propType == 'dist':
@@ -108,13 +140,16 @@ class ViewSettings(QWidget):
                     prop = self.settings.value(propName)
                 if prop is not None:
                     setattr(self, propName, prop)
+                    self.settings.setValue(propName, prop)
                 else: raise TypeError
             except:
                 setattr(self, propName, self._defaults[propName])
+                self.settings.setValue(propName, self._defaults[propName])
+        return self.settings, self._properties
 
     def initButtons(self):
 
-# ------------------------------- Preview Text ------------------------------- #
+        # ------------------------------- Preview Text ------------------------------- #
 
         # Button Initializations
         _previewTitle = QLabel("Preview ")
@@ -136,7 +171,9 @@ class ViewSettings(QWidget):
         _previewFont.clicked.connect(lambda: self.getFont_('previewFont'))
         _previewPadding.clicked.connect(lambda: self.getInt_('previewPadding'))
 
+        # --------------------------- Selection Rubberband --------------------------- #        
 # --------------------------- Selection Rubberband --------------------------- #        
+        # --------------------------- Selection Rubberband --------------------------- #        
 
         # Button Initializations
         _selectionTitle = QLabel("Selection ")
@@ -165,7 +202,7 @@ class ViewSettings(QWidget):
         self._liveView.setLayout(QGridLayout(self._liveView))
 
         # Selection Rubberband Live View
-        self._rubberBand = CustomBand(QRubberBand.Rectangle, self._liveView)
+        self._rubberBand = CustomBand(CustomBand.Rectangle, self._liveView)
         self._rubberBand.setObjectName('selectionBand')
         
         # Preview Text Live View
@@ -176,68 +213,40 @@ class ViewSettings(QWidget):
         self._rubberBand.show()
         self.layout().addWidget(self._liveView, 2, 0, -1, -1)
 
-    def updateLiveView(self):
+# --------------------------- Property Setters and Getters --------------------------- #
 
-        def colorToRGBA(objectName):
-            _c = getattr(self, objectName)
-            if self._properties[objectName] == 'rgba':
-                color = f"rgba({_c.red()}, {_c.green()}, {_c.blue()}, {_c.alpha()})"
-                return color
+    def setProperty_(self, objectName, value):
+        self.settings.setValue(objectName, value)
+        setattr(self, objectName, value)
+        self.updateLiveView()
 
-        _previewPadding = f"{self.previewPadding}px"
-        _previewColor = colorToRGBA('previewColor')
-        _previewBackground = colorToRGBA('previewBackground')
-        _windowColor = colorToRGBA('windowColor')
-        styles = f"""
-            QLabel#previewText {{ 
-                color: {_previewColor};
-                background-color: {_previewBackground}; 
-                padding: {_previewPadding};
-                font-family: {self.previewFont.family()};
-                font-size: {self.previewFont.pointSize()}pt;
-                margin-top: 0.02em;
-                margin-left: 0.02em;
-            }}
-        """
-        self.setStyleSheet(styles)
-
-        # BUG: Rubberband not updating on start
-        palette = QPalette()
-        palette.setBrush(QPalette.Highlight, QBrush(self.selectionBackground))
-        self._rubberBand.setPalette(palette)
-        self._rubberBand.setBorder(self.selectionBorderColor, self.selectionBorderThickness)
-   
     def getColor_(self, objectName):
         try:
             initialColor = self.settings.value(objectName)
         except:
-            pass
+            initialColor = None
         if initialColor is None:
             initialColor = self._defaults[objectName]
         color = QColorDialog().getColor(initial=initialColor, options=QColorDialog.ShowAlphaChannel)
         if color.isValid():
-            self.settings.setValue(objectName, color)
-            setattr(self, objectName, color)
-            self.updateLiveView()
+            self.setProperty_(objectName, color)
 
     def getFont_(self, objectName):
         try:
             initialFont = self.settings.value(objectName)
         except:
-            pass
+            initialFont = None
         if initialFont is None:
             initialFont = self._defaults[objectName]
         font, accepted = QFontDialog().getFont(initialFont)
         if accepted:
-            setattr(self, objectName, font)
-            self.settings.setValue(objectName, font)
-            self.updateLiveView()
+            self.setProperty_(objectName, font)
 
     def getInt_(self, objectName):
         try:
             initialInt = int(self.settings.value(objectName))
         except:
-            pass
+            initialInt = None
         if initialInt is None:
             initialInt = self._defaults[objectName]
         i, accepted = QInputDialog.getInt(
@@ -250,9 +259,7 @@ class ViewSettings(QWidget):
             flags=Qt.CustomizeWindowHint | Qt.WindowTitleHint)
 
         if accepted:
-            setattr(self, objectName, i)
-            self.settings.setValue(objectName, i)
-            self.updateLiveView()
+            self.setProperty_(objectName, i)
 
 
 class SettingsMenu(QWidget):

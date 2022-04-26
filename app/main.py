@@ -53,7 +53,6 @@ if __name__ == '__main__':
 
     widget.show()
     widget.loadModel()
-    app.exec_()
 
     # keybinder.unregister_hotkey(widget.winId(), previousShortcut)
-    sys.exit()
+    sys.exit(app.exec_())
