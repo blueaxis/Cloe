@@ -124,7 +124,8 @@ class SystemTrayApp(QSystemTrayIcon):
         externalWindow = ExternalWindow(self.tracker)
         externalWindow.showFullScreen()
 
-    # BUG: Menu is closing when another event is triggered
+    # BUG: Menu is closing when some event in MangaOCR is triggered
+    # Might be solvable using threads?
     def openSettings(self):
         SettingsMenu(self, self.tracker).show()
 
@@ -143,10 +144,6 @@ class SettingsMenu(QWidget):
 
     # Save configurations on close
     def closeEvent(self, event):
-        # try:
-        #     rmtree("./poricom_cache")
-        # except FileNotFoundError:
-        #     pass
         saveOnClose(self.config)
         self._parent.config = self.config
         return super().closeEvent(event)

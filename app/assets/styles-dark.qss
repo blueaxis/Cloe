@@ -49,7 +49,7 @@ QLabel#canvasText {
 }
 
 QLabel {
-  font-size: 10pt;
+  font-size: 9pt;
   color: #B5BDBD;
 }
 
@@ -93,6 +93,8 @@ QPushButton:pressed {
 
 /* Dialog */
 
+QTabWidget QPushButton,
+QDialog QPushButton,
 QDialogButtonBox QPushButton,
 QMessageBox QPushButton {
   color: #eff0f1;
@@ -108,7 +110,7 @@ QComboBox {
   padding: 0.23em;
   min-width: 2.5em;
   color: #eff0f1;
-  font-size: 10pt;
+  font-size: 9pt;
   background-color: #31363b;
 }
 
@@ -176,7 +178,7 @@ QLineEdit {
   border-radius: 0.1em;
   min-width: 3em;
   /* min-height: 1.5em; */
-  font-size: 10pt;
+  font-size: 9pt;
 }
 
 QLineEdit:hover,
