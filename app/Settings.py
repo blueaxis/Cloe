@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 
-from PyQt5.QtGui import (QColor, QPalette, QBrush, QPainter, QPen)
+from PyQt5.QtGui import (QColor, QPalette, QBrush, QPainter, QPen, QFont)
 from PyQt5.QtCore import (Qt, QSize, QSettings)
-from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorDialog, 
+from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorDialog, QFontDialog,
     QRubberBand, QApplication, QGridLayout, QHBoxLayout, QWidget, QTabWidget, QPushButton, QVBoxLayout)
 
 class CustomBand(QRubberBand):
@@ -53,7 +53,7 @@ class ViewSettings(QWidget):
         # Properties and defaults
         self._defaults = {
             # Preview
-            'previewFont': 'font',
+            'previewFont': QFont("Arial", 16),
             'previewColor': "rgba(239, 240, 241, 1)",
             'previewBackground': "rgba(72, 75, 106, 0.9)",
             'previewPadding': "0.25em",
@@ -116,6 +116,7 @@ class ViewSettings(QWidget):
         # Signals and Slots
         _previewColor.clicked.connect(lambda: self.getColor_('previewColor'))        
         _previewBackground.clicked.connect(lambda: self.getColor_('previewBackground'))
+        _previewFont.clicked.connect(lambda: self.getFont_('previewFont'))
 
 # --------------------------- Selection Rubberband --------------------------- #        
 
@@ -167,7 +168,7 @@ class ViewSettings(QWidget):
                 elif propType == 'dist':
                     pass
                 elif propType == 'font':
-                    pass
+                    prop = self.settings.value(propName)
                 if prop is not None: setattr(self, propName, self._defaults[propName])
                 else: raise TypeError
             except:
@@ -175,23 +176,23 @@ class ViewSettings(QWidget):
 
     def updateLiveView(self):
         self.previewPadding = '0.25em'
-        self.selectionBorderThickness = '0.1em'
         styles = f"""
             QLabel#previewText {{ 
                 color: {self.previewColor};
                 background-color: {self.previewBackground}; 
                 padding: {self.previewPadding};
-                font-family: 'Helvetica';
-                font-size: 16pt;
+                font-family: {self.previewFont.family()};
+                font-size: {self.previewFont.pointSize()}pt;
                 margin-top: 0.02em;
                 margin-left: 0.02em;
             }}
-            """
+        """
         self.setStyleSheet(styles)
+        self._previewText.setFont(self.previewFont)
 
         palette = QPalette()
         palette.setBrush(QPalette.Highlight, QBrush(self.selectionBackground))
-        self._rubberBand.setBorder(self.selectionBorderColor, 2)
+        self._rubberBand.setBorder(self.selectionBorderColor, self.selectionBorderThickness)
         self._rubberBand.setPalette(palette) 
    
     def getColor_(self, objectName):
@@ -209,6 +210,20 @@ class ViewSettings(QWidget):
                 setattr(self, objectName, color)
             else: setattr(self, objectName, _c)
             self.updateLiveView()
+
+    def getFont_(self, objectName):
+        try:
+            initialFont = self.settings.value(objectName)
+        except:
+            pass
+        if initialFont is None:
+            initialFont = QFont()
+        font, accepted = QFontDialog().getFont(initialFont)
+        if accepted:
+            self.previewFont = font
+            self.settings.setValue(objectName, font)
+            self.updateLiveView()
+
 
 class SettingsMenu(QWidget):
     def __init__(self, parent=None):

@@ -196,6 +196,7 @@ QAbstractSpinBox:down-button {
   height: 0em;
 }
 
+QFontDialog QAbstractItemView,
 QComboBox QAbstractItemView {
   background-color: #31363b;
   selection-background-color: #5870A5;
@@ -216,6 +217,7 @@ QAbstractItemView::item:pressed {
 
 QAbstractItemView::item:selected:!active {
   background: rgba(135, 143, 230, 0.1);
+  color: #eff0f1;
 }
 
 QTreeView::item {
