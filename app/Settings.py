@@ -66,7 +66,7 @@ class ViewSettings(QWidget):
             self._rubberBand.setGeometry(x, y, w, h)
         return super().resizeEvent(event)
 
-    def updateLiveView(self):
+    def updateLiveView(self, inSettings = True):
 
         def colorToRGBA(objectName):
             _c = getattr(self, objectName)
@@ -91,7 +91,10 @@ class ViewSettings(QWidget):
                 margin-left: 0.02em;
             }}
         """
-        self.setStyleSheet(styles)
+        if inSettings:
+            self.setStyleSheet(styles)
+        elif not inSettings:
+            self.parent.setStyleSheet(styles)
 
         # BUG: Rubberband not updating on start
         palette = QPalette()
@@ -145,7 +148,6 @@ class ViewSettings(QWidget):
             except:
                 setattr(self, propName, self._defaults[propName])
                 self.settings.setValue(propName, self._defaults[propName])
-        return self.settings, self._properties
 
     def initButtons(self):
 
@@ -171,8 +173,6 @@ class ViewSettings(QWidget):
         _previewFont.clicked.connect(lambda: self.getFont_('previewFont'))
         _previewPadding.clicked.connect(lambda: self.getInt_('previewPadding'))
 
-        # --------------------------- Selection Rubberband --------------------------- #        
-# --------------------------- Selection Rubberband --------------------------- #        
         # --------------------------- Selection Rubberband --------------------------- #        
 
         # Button Initializations
