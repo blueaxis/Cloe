@@ -41,18 +41,7 @@ if __name__ == '__main__':
     with open(styles, 'r') as fh:
         app.setStyleSheet(fh.read())
 
-    keybinder.init()
-    previousShortcut = config["SHORTCUT"]["captureExternal"]
-
-    # WinId might be incorrect here
-    keybinder.register_hotkey(
-       0, config["SHORTCUT"]["captureExternal"], widget.captureExternal)
-    winEventFilter = WinEventFilter(keybinder)
-    eventDispatcher = QAbstractEventDispatcher.instance()
-    eventDispatcher.installNativeEventFilter(winEventFilter)
-
     widget.show()
     widget.loadModel()
 
-    # keybinder.unregister_hotkey(widget.winId(), previousShortcut)
     sys.exit(app.exec_())

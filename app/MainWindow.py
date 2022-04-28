@@ -34,7 +34,7 @@ from Ribbon import (Ribbon)
 from Views import (ExternalWindow)
 from Settings import SettingsMenu
 from Popups import (ShortcutPicker, FontPicker, PickerPopup, MessagePopup)
-
+from Workers import HotKeys
 
 class WinEventFilter(QAbstractNativeEventFilter):
     def __init__(self, keybinder):
@@ -57,6 +57,11 @@ class SystemTrayApp(QSystemTrayIcon):
         self.config = config
         self.threadpool = QThreadPool()
 
+        d = { '<ctrl>+<alt>+h': (self, 'startCapture') }
+        h = HotKeys(d)
+        h.start()
+        h.signals.result.connect(self.processGlobalHotkey)
+
         # Menu
         menu = QMenu(parent)
         self.setContextMenu(menu)
@@ -64,6 +69,10 @@ class SystemTrayApp(QSystemTrayIcon):
         # Menu Actions
         menu.addAction("Settings", self.openSettings)
         menu.addAction("Exit", QApplication.instance().exit)
+
+    def processGlobalHotkey(self, objectMethod):
+        object_, method_ = objectMethod
+        getattr(object_, method_)()
 
     def loadModel(self):
         def loadModelHelper(tracker):
@@ -113,7 +122,7 @@ class SystemTrayApp(QSystemTrayIcon):
         worker.signals.result.connect(modelLoadedConfirmation)
         self.threadpool.start(worker)
 
-    def captureExternal(self):
+    def startCapture(self):
 
         if self.tracker.ocrModel == None:
             self.showMessage(

@@ -126,7 +126,7 @@ class ExternalWindow(QMainWindow):
         super().__init__()
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("border:0px; margin:0px")
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_NoSystemBackground, True)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
 
