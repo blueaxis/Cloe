@@ -93,12 +93,26 @@ class BaseCanvas(QGraphicsView):
         pixbox = self.pixmap.copy(self._rubberBand.geometry())
 
         _worker = BaseWorker(pixboxToText, pixbox, lang, self.tracker.ocrModel)
-        _worker.signals.result.connect(self._canvasText.setText)
-        _worker.signals.finished.connect(self._canvasText.adjustSize)
+        _worker.signals.result.connect(self.ocrFinished)
+        #_worker.signals.result.connect(self._canvasText.setText)
+        #_worker.signals.finished.connect(self._canvasText.adjustSize)
         self._timer.timeout.disconnect(self.rubberBandStopped)
-        _worker.signals.finished.connect(
-            lambda: self._timer.timeout.connect(self.rubberBandStopped))
+        #_worker.signals.finished.connect(
+        #    lambda: self._timer.timeout.connect(self.rubberBandStopped))
         QThreadPool.globalInstance().start(_worker)
+
+    def closeEvent(self, event):
+        # Ensure that object is deleted before closing
+        self.deleteLater()
+        return super().closeEvent(event)
+
+    def ocrFinished(self, text):
+        try:
+            self._canvasText.setText(text)
+            self._canvasText.adjustSize()
+            self._timer.timeout.connect(self.rubberBandStopped)
+        except Exception as e:
+            print(e)
 
 
 class FullScreen(BaseCanvas, ViewSettings):
@@ -131,3 +145,8 @@ class ExternalWindow(QMainWindow):
         self.setAttribute(Qt.WA_TranslucentBackground, True)
 
         self.setCentralWidget(FullScreen(self, tracker))
+
+    def closeEvent(self, event):
+        # Ensure that object is deleted before closing
+        self.deleteLater()
+        return super().closeEvent(event)

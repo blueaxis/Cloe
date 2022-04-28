@@ -57,7 +57,7 @@ class SystemTrayApp(QSystemTrayIcon):
         self.config = config
         self.threadpool = QThreadPool()
 
-        d = { '<ctrl>+<alt>+h': (self, 'startCapture') }
+        d = { '<alt>+Q': (self, 'startCapture') }
         h = HotKeys(d)
         h.start()
         h.signals.result.connect(self.processGlobalHotkey)
@@ -130,8 +130,8 @@ class SystemTrayApp(QSystemTrayIcon):
                 "Please wait until the MangaOCR model is loaded."
             )
             return
-        externalWindow = ExternalWindow(self.tracker)
-        externalWindow.showFullScreen()
+        self.externalWindow = ExternalWindow(self.tracker)
+        self.externalWindow.showFullScreen()
 
     def openSettings(self):
         # TODO: Destroy settings menu when closed 
