@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from os import remove
+
 from PyQt5.QtGui import (QColor, QPalette, QBrush, QPainter, QPen, QFont)
 from PyQt5.QtCore import (Qt, QSize, QSettings)
 from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorDialog, QFontDialog,
@@ -42,7 +44,46 @@ class CustomBand(QRubberBand):
         painter.end()
         return super().paintEvent(event)
 
-class ViewSettings(QWidget):
+class SettingsTab(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+
+    def addButtonBar(self, row):
+        buttonBar = QWidget()
+        buttonBar.setLayout(QHBoxLayout(buttonBar))
+        buttonBar.layout().setContentsMargins(0, 0, 0, 0)
+
+        self.okButton = QPushButton("Save")
+        self.cancelButton = QPushButton("Close")
+        self.defaultButton = QPushButton("Restore Defaults")
+
+        self.okButton.clicked.connect(self.saveSettings)
+        self.cancelButton.clicked.connect(self.parentWidget().close)
+        self.defaultButton.clicked.connect(self.restoreDefaults)
+
+        buttonBar.layout().addWidget(self.defaultButton)
+        buttonBar.layout().addStretch()
+        buttonBar.layout().addWidget(self.okButton)
+        buttonBar.layout().addWidget(self.cancelButton)
+
+        self.layout().addWidget(buttonBar, row, 0, 1, -1, alignment=Qt.AlignBottom)
+
+    def updateUI(self):
+        self.restoreSettings()
+
+    def saveSettings(self):
+        pass
+
+    def restoreDefaults(self):
+        try:
+            remove(self.settings.fileName())
+        except FileNotFoundError:
+            pass
+        self.updateUI()
+
+
+class ViewSettings(SettingsTab):
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -53,16 +94,17 @@ class ViewSettings(QWidget):
         self.initButtons()
         self.initLiveView()
         self.updateLiveView()
+        self.addButtonBar(self.layout().rowCount())
 
 # ----------------------------------- View Updates ----------------------------------- #
 
     def resizeEvent(self, event):
         if self._liveView is not None:
             # Resize rubber band when window size is changed
-            w = 0.25 * self._liveView.width() 
+            w = 0.4 * self._liveView.width() 
             y = 0.05 * self._liveView.height()
             x = self._liveView.width() - w - y
-            h = self._liveView.height() - 2*y
+            h = self._liveView.height() - 6*y
             self._rubberBand.setGeometry(x, y, w, h)
         return super().resizeEvent(event)
 
@@ -107,10 +149,18 @@ class ViewSettings(QWidget):
         self._rubberBand.setPalette(palette)
         self._rubberBand.setBorder(self.selectionBorderColor, self.selectionBorderThickness)
 
+    def updateUI(self):
+        self.restoreSettings()
+        self.updateLiveView()
+
 # ------------------------------------- Settings ------------------------------------- #
 
+    def saveSettings(self):
+        for propName, _ in self._properties.items():
+            self.settings.setValue(propName, getattr(self, propName))
+
     def restoreSettings(self):
-        self.settings = QSettings("./utils/MangaOCR-view.ini", QSettings.IniFormat)
+        self.settings = QSettings("./utils/Manga2OCR-view.ini", QSettings.IniFormat)
         # Properties and defaults
         self._defaults = {
             # Preview
@@ -148,15 +198,13 @@ class ViewSettings(QWidget):
                     prop = int(self.settings.value(propName))
                 elif propType == 'font':
                     prop = self.settings.value(propName)
-                if prop is not None:
+                if self.settings.contains(propName):
                     setattr(self, propName, prop)
-                    self.settings.setValue(propName, prop)
                 else: raise TypeError
             except:
                 # Property does not exist in settings
                 # Use default value
                 setattr(self, propName, self._defaults[propName])
-                self.settings.setValue(propName, self._defaults[propName])
 
 # -------------------------------- UI Initializations -------------------------------- #
 
@@ -228,13 +276,12 @@ class ViewSettings(QWidget):
 
     def setProperty_(self, objectName, value):
         # Set the value of a member of this class with name objectName
-        self.settings.setValue(objectName, value)
         setattr(self, objectName, value)
         self.updateLiveView()
 
     def getColor_(self, objectName):
         try:
-            initialColor = self.settings.value(objectName)
+            initialColor = getattr(self, objectName)
         except:
             initialColor = None
         if initialColor is None:
@@ -245,7 +292,7 @@ class ViewSettings(QWidget):
 
     def getFont_(self, objectName):
         try:
-            initialFont = self.settings.value(objectName)
+            initialFont = getattr(self, objectName)
         except:
             initialFont = None
         if initialFont is None:
@@ -256,7 +303,7 @@ class ViewSettings(QWidget):
 
     def getInt_(self, objectName):
         try:
-            initialInt = int(self.settings.value(objectName))
+            initialInt = int(getattr(self, objectName))
         except:
             initialInt = None
         if initialInt is None:
@@ -273,7 +320,7 @@ class ViewSettings(QWidget):
         if accepted:
             self.setProperty_(objectName, i)
 
-class HotkeySettings(QWidget):
+class HotkeySettings(SettingsTab):
 
     class HotkeyContainer(QWidget):
 
@@ -291,7 +338,7 @@ class HotkeySettings(QWidget):
             self.initButtons(shortcutName)
             self.restoreSettings()
 
-        # ----------------------- Settings and Initializations ----------------------- #
+        # ---------------------------- UI Initializations ---------------------------- #
 
         def initButtons(self, shortcutName):
             self.shortcutName = QLabel(shortcutName)
@@ -317,6 +364,31 @@ class HotkeySettings(QWidget):
             self.layout().addWidget(self.altCheckBox, alignment=Qt.AlignRight)
             self.layout().addWidget(self.winCheckBox, alignment=Qt.AlignRight)
             self.layout().addWidget(self.keyComboBox, alignment=Qt.AlignRight)
+
+        # --------------------------------- Settings --------------------------------- #
+
+        def saveSettings(self):
+            _shortcut = ""
+            _shortcut += "<Shift>+" * self.shiftCheckBox.isChecked()
+            _shortcut += "<Ctrl>+" * self.ctrlCheckBox.isChecked()
+            _shortcut += "<Alt>+" * self.altCheckBox.isChecked()
+            _shortcut += "<Cmd>+" * self.winCheckBox.isChecked()
+
+            _key = self.keyComboBox.currentText()
+            if _key == "<Unmapped>": _key = ""
+            _shortcut += _key
+
+            for propName, propObject in self._properties.items():
+                try:
+                    prop = getattr(self, propObject).isChecked()
+                except AttributeError:
+                    prop = getattr(self, propObject).currentIndex()
+                self.settings.setValue(propName, int(prop))
+
+            _shortcutText = self.shortcutName.text().split(" ")
+            _shortcutName = _shortcutText[0].lower() + "".join(s.title() for s in _shortcutText[1:])
+
+            return _shortcut, _shortcutName
 
         def restoreSettings(self):
             self.settings = QSettings("./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
@@ -345,68 +417,62 @@ class HotkeySettings(QWidget):
 
             for propName, propObject in self._properties.items():
                 try:
+                    # Override default state if saved in settings
+                    if self.settings.contains(propName):
+                        prop = self.settings.value(propName, type=int)
+                        setObjectState(propObject, prop)
+                    else: raise TypeError
+                except:
                     # Set default state if it exists
                     if propName in self._defaults:
                         setObjectState(propObject, self._defaults[propName])
-                        setattr(self, propName, self._defaults[propName])
                         continue
-                    # Override default state if saved in settings
-                    prop = self.settings.value(propName)
-                    if prop is not None:
-                        setObjectState(propObject, prop)
-                        setattr(self, propName, prop)
-                        # self.settings.setValue(propName, prop)
-                    else: raise TypeError
-                except:
                     # No existing default or saved settings
                     # Therefore, action is unmapped
                     setObjectState(propObject, 0)
-                    setattr(self, propName, 0)
-                    # self.settings.setValue(propName, 0)
 
-        def saveSettings(self):
-            _shortcut = ""
-            _shortcut += "<shift>+" * self.shiftCheckBox.isChecked()
-            _shortcut += "<ctrl>+" * self.ctrlCheckBox.isChecked()
-            _shortcut += "<alt>+" * self.altCheckBox.isChecked()
-            _shortcut += "<cmd>+" * self.winCheckBox.isChecked()
+# -------------------------------- UI Initializations -------------------------------- #
 
-            _key = self.keyComboBox.currentText()
-            if _key == "<Unmapped>": _key = ""
-            _shortcut += _key
-
-            for propName, _ in self._properties.items():
-                self.settings.setValue(propName, getattr(self, propName))
-
-            _shortcutText = self.shortcutName.text().split(" ")
-            _shortcutName = _shortcutText[0].lower() + "".join(s.title() for s in _shortcutText[1:])
-
-            return _shortcut, _shortcutName
-
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.settings = QSettings("./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
 
         # Layout and margins
-        self.setLayout(QVBoxLayout(self))
+        self.setLayout(QGridLayout(self))
         self.layout().setAlignment(Qt.AlignTop)
 
-        self.a = self.HotkeyContainer("Start Capture")
+        self.addHotkeyContainers()
+        self.layout().addWidget(QWidget())
+        self.layout().setRowStretch(self.layout().rowCount()-1, 1)
+        self.addButtonBar(self.layout().rowCount())
 
-        self.layout().addWidget(self.a)
-        self.layout().addWidget(self.HotkeyContainer("Open Settings"))
-        self.layout().addWidget(self.HotkeyContainer("Toggle Logging"))
-        self.layout().addWidget(self.HotkeyContainer("Close Application"))
+    def addHotkeyContainers(self):
+        self.containerList = []
+        _actionList = ["Start Capture",
+                       "Toggle Logging",
+                       "Close Application"]
+        for _action in _actionList:
+            self.containerList.append(self.HotkeyContainer(_action))
+            self.layout().addWidget(self.containerList[-1])
 
-    def mouseDoubleClickEvent(self, event):
-        self.a.saveSettings()
-        return super().mouseDoubleClickEvent(event)
+# ------------------------------------- Settings ------------------------------------- #
+
+    def saveSettings(self):
+        for container in self.containerList:
+            hotkey, action = container.saveSettings()
+    
+    def restoreSettings(self):
+        for container in self.containerList:
+            container.restoreSettings()
 
 class SettingsMenu(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+
         self.tabs = QTabWidget()
-        self.tabs.addTab(HotkeySettings(), "HOTKEYS")
-        self.tabs.addTab(ViewSettings(), "VIEW")
+        self.tabs.addTab(HotkeySettings(self), "HOTKEYS")
+        self.tabs.addTab(ViewSettings(self), "VIEW")
 
         self.setLayout(QVBoxLayout(self))
         self.layout().addWidget(self.tabs)
