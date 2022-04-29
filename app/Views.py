@@ -24,7 +24,8 @@ from PyQt5.QtWidgets import (QMainWindow,
     QRubberBand, QGraphicsOpacityEffect, QApplication, QGraphicsView, QLabel)
 
 from Workers import BaseWorker
-from Settings import ViewSettings, CustomBand
+from Settings import ViewSettings
+from Preview import CustomBand
 from utils.image_io import logText, pixboxToText
 
 class BaseCanvas(QGraphicsView):
@@ -127,7 +128,7 @@ class FullScreen(BaseCanvas, ViewSettings):
 
         # Restore settings and update view
         self._liveView = None
-        self.restoreSettings()
+        self.loadSettings()
         self.updateLiveView(inSettings=False)
 
     def mouseReleaseEvent(self, event):

@@ -24,25 +24,7 @@ from PyQt5.QtCore import (Qt, QSize, QSettings)
 from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorDialog, QFontDialog,
     QRubberBand, QCheckBox, QGridLayout, QHBoxLayout, QWidget, QTabWidget, QPushButton, QVBoxLayout)
 
-class CustomBand(QRubberBand):
-
-    def __init__(self, shape, parent, borderColor=Qt.blue, thickness=2):
-        super().__init__(shape, parent)
-        self.setBorder(borderColor, thickness)
-    
-    def setBorder(self, color, thickness):
-        self._borderColor = color
-        self._borderThickness = thickness
-
-    def paintEvent(self, event):
-        painter = QPainter()
-        pen = QPen(self._borderColor, self._borderThickness)
-        pen.setStyle(Qt.SolidLine)
-        painter.begin(self)
-        painter.setPen(pen)
-        painter.drawRect(event.rect())
-        painter.end()
-        return super().paintEvent(event)
+from Preview import PreviewContainer
 
 class SettingsTab(QWidget):
     def __init__(self, parent=None):
@@ -70,7 +52,7 @@ class SettingsTab(QWidget):
         self.layout().addWidget(buttonBar, row, 0, 1, -1, alignment=Qt.AlignBottom)
 
     def updateUI(self):
-        self.restoreSettings()
+        self.loadSettings()
 
     def saveSettings(self):
         pass
@@ -90,7 +72,7 @@ class ViewSettings(SettingsTab):
         self.parent = parent
 
         self.setLayout(QGridLayout(self))
-        self.restoreSettings()
+        self.loadSettings()
         self.initButtons()
         self.initLiveView()
         self.updateLiveView()
@@ -98,15 +80,21 @@ class ViewSettings(SettingsTab):
 
 # ----------------------------------- View Updates ----------------------------------- #
 
-    def resizeEvent(self, event):
-        if self._liveView is not None:
-            # Resize rubber band when window size is changed
-            w = 0.4 * self._liveView.width() 
-            y = 0.05 * self._liveView.height()
-            x = self._liveView.width() - w - y
-            h = self._liveView.height() - 6*y
-            self._rubberBand.setGeometry(x, y, w, h)
-        return super().resizeEvent(event)
+    # It would make more sense if this is a PreviewContainer method. However,
+    # this requires the configuration-related methods to be moved as well.
+    def stylePreviewText(self, font, padding, color, background):
+        styles = f"""
+            QLabel#previewText {{ 
+                color: {color};
+                background-color: {background}; 
+                padding: {padding}px;
+                font-family: {font.family()};
+                font-size: {font.pointSize()}pt;
+                margin-top: 0.02em;
+                margin-left: 0.02em;
+            }}\n
+        """
+        return styles
 
     def updateLiveView(self, inSettings = True):
 
@@ -119,38 +107,28 @@ class ViewSettings(SettingsTab):
                 return color
 
         # Update preview text style
-        _previewPadding = f"{self.previewPadding}px"
-        _previewColor = colorToRGBA('previewColor')
-        _previewBackground = colorToRGBA('previewBackground')
+        styles = self.stylePreviewText(self.previewFont, self.previewPadding,
+            colorToRGBA('previewColor'), colorToRGBA('previewBackground'))
+        
+        # Update window background color
         # TODO: Window color is not set properly since parent color is different
         # BUG: Styles are not being applied to liveView object
         _windowColor = colorToRGBA('windowColor')
-        styles = f"""
-            QLabel#previewText {{ 
-                color: {_previewColor};
-                background-color: {_previewBackground}; 
-                padding: {_previewPadding};
-                font-family: {self.previewFont.family()};
-                font-size: {self.previewFont.pointSize()}pt;
-                margin-top: 0.02em;
-                margin-left: 0.02em;
-            }}
-        """
+        
+        # Set stylesheet and update selection rubberband
         if inSettings:
             self.setStyleSheet(styles)
+            self._liveView.rubberBand.setFill(self.selectionBackground)
+            self._liveView.rubberBand.setBorder(self.selectionBorderColor, 
+                self.selectionBorderThickness)
         elif not inSettings:
             self.parent.setStyleSheet(styles)
-
-        # Update rubberband color scheme
-        # BUG: Rubberband not updating on start (in live preview)
-        # TODO: Rubberband outline looks bad
-        palette = QPalette()
-        palette.setBrush(QPalette.Highlight, QBrush(self.selectionBackground))
-        self._rubberBand.setPalette(palette)
-        self._rubberBand.setBorder(self.selectionBorderColor, self.selectionBorderThickness)
+            self._rubberBand.setFill(self.selectionBackground)
+            self._rubberBand.setBorder(self.selectionBorderColor, 
+                self.selectionBorderThickness)
 
     def updateUI(self):
-        self.restoreSettings()
+        self.loadSettings()
         self.updateLiveView()
 
 # ------------------------------------- Settings ------------------------------------- #
@@ -159,7 +137,7 @@ class ViewSettings(SettingsTab):
         for propName, _ in self._properties.items():
             self.settings.setValue(propName, getattr(self, propName))
 
-    def restoreSettings(self):
+    def loadSettings(self):
         self.settings = QSettings("./utils/Manga2OCR-view.ini", QSettings.IniFormat)
         # Properties and defaults
         self._defaults = {
@@ -169,9 +147,9 @@ class ViewSettings(SettingsTab):
             'previewBackground': QColor(72, 75, 106, 230),
             'previewPadding': 10,
             # Selection rubberband
-            'selectionBorderColor': QColor(0, 128, 255, 60),
+            'selectionBorderColor': QColor(0, 128, 255, 255),
             'selectionBorderThickness': 2,
-            'selectionBackground': QColor(0, 128, 255, 255),
+            'selectionBackground': QColor(0, 128, 255, 60),
             'windowColor': QColor(255, 255, 255, 3)
         }
         self._properties = {
@@ -256,21 +234,10 @@ class ViewSettings(SettingsTab):
 
     def initLiveView(self):
         # Live View
-        self._liveView = QWidget()
-        self._liveView.setObjectName('liveView')
-        self._liveView.setLayout(QGridLayout(self._liveView))
-
-        # Selection Rubberband Live View
-        self._rubberBand = CustomBand(CustomBand.Rectangle, self._liveView)
-        self._rubberBand.setObjectName('selectionBand')
-        
-        # Preview Text Live View
-        self._previewText = QLabel(" Sample Text ")
-        self._previewText.setObjectName('previewText')
-        self._previewText.adjustSize()
-        self._liveView.layout().addWidget(self._previewText, 0, 0, alignment=Qt.AlignTop | Qt.AlignLeft)
-        self._rubberBand.show()
-        self.layout().addWidget(self._liveView, 2, 0, -1, -1)
+        self._liveView = PreviewContainer(self)
+        self._rubberBand = self.findChild(QRubberBand, "selectionBand")
+        self.layout().addWidget(self._liveView, 2, 0, 1, -1)
+        self.layout().setRowStretch(self.layout().rowCount()-1, 1)
 
 # --------------------------- Property Setters and Getters --------------------------- #
 
@@ -311,10 +278,10 @@ class ViewSettings(SettingsTab):
         i, accepted = QInputDialog.getInt(
             self,
             "Margin/Padding Settings",
-            f"Enter a value between 5 and 100:",
+            "Enter a value between 1 and 50:",
             value=initialInt,
-            min=5,
-            max=100,
+            min=1,
+            max=50,
             flags=Qt.CustomizeWindowHint | Qt.WindowTitleHint)
 
         if accepted:
@@ -336,7 +303,7 @@ class HotkeySettings(SettingsTab):
             self.layout().setContentsMargins(_margin)
 
             self.initButtons(shortcutName)
-            self.restoreSettings()
+            self.loadSettings()
 
         # ---------------------------- UI Initializations ---------------------------- #
 
@@ -390,7 +357,7 @@ class HotkeySettings(SettingsTab):
 
             return _shortcut, _shortcutName
 
-        def restoreSettings(self):
+        def loadSettings(self):
             self.settings = QSettings("./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
 
             # Properties and defaults
@@ -450,6 +417,7 @@ class HotkeySettings(SettingsTab):
         self.containerList = []
         _actionList = ["Start Capture",
                        "Toggle Logging",
+                       "Open Settings",
                        "Close Application"]
         for _action in _actionList:
             self.containerList.append(self.HotkeyContainer(_action))
@@ -461,9 +429,9 @@ class HotkeySettings(SettingsTab):
         for container in self.containerList:
             hotkey, action = container.saveSettings()
     
-    def restoreSettings(self):
+    def loadSettings(self):
         for container in self.containerList:
-            container.restoreSettings()
+            container.loadSettings()
 
 class SettingsMenu(QWidget):
     def __init__(self, parent=None):
