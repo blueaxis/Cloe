@@ -57,10 +57,14 @@ class SystemTrayApp(QSystemTrayIcon):
         self.config = config
         self.threadpool = QThreadPool()
 
-        d = { '<alt>+Q': (self, 'startCapture') }
-        h = HotKeys(d)
-        h.start()
-        h.signals.result.connect(self.processGlobalHotkey)
+        d = {'<alt>+Q': (self, 'startCapture'),
+            '<cmd>+T': (self, 'openSettings'),
+            '<ctrl>+R': (self, 'openSettings'),
+            '<Shift>+Y': (self, 'unbindHotkeys')
+        }
+        self.h = HotKeys(d)
+        self.h.start()
+        self.h.signals.result.connect(self.processGlobalHotkey)
 
         # Menu
         menu = QMenu(parent)
@@ -69,6 +73,9 @@ class SystemTrayApp(QSystemTrayIcon):
         # Menu Actions
         menu.addAction("Settings", self.openSettings)
         menu.addAction("Exit", QApplication.instance().exit)
+
+    def unbindHotkeys(self):
+        self.h.stop()
 
     def processGlobalHotkey(self, objectMethod):
         object_, method_ = objectMethod

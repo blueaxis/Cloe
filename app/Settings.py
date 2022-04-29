@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from PyQt5.QtGui import (QColor, QPalette, QBrush, QPainter, QPen, QFont)
 from PyQt5.QtCore import (Qt, QSize, QSettings)
 from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorDialog, QFontDialog,
-    QRubberBand, QApplication, QGridLayout, QHBoxLayout, QWidget, QTabWidget, QPushButton, QVBoxLayout)
+    QRubberBand, QCheckBox, QGridLayout, QHBoxLayout, QWidget, QTabWidget, QPushButton, QVBoxLayout)
 
 class CustomBand(QRubberBand):
 
@@ -59,7 +59,7 @@ class ViewSettings(QWidget):
     def resizeEvent(self, event):
         if self._liveView is not None:
             # Resize rubber band when window size is changed
-            w = 0.35 * self._liveView.width() 
+            w = 0.25 * self._liveView.width() 
             y = 0.05 * self._liveView.height()
             x = self._liveView.width() - w - y
             h = self._liveView.height() - 2*y
@@ -69,11 +69,14 @@ class ViewSettings(QWidget):
     def updateLiveView(self, inSettings = True):
 
         def colorToRGBA(objectName):
+            # Convert QColor to a QSS string of the following format:
+            # "rgba(<red>, <green>, <blue>, <alpha>)"
             _c = getattr(self, objectName)
             if self._properties[objectName] == 'rgba':
                 color = f"rgba({_c.red()}, {_c.green()}, {_c.blue()}, {_c.alpha()})"
                 return color
 
+        # Update preview text style
         _previewPadding = f"{self.previewPadding}px"
         _previewColor = colorToRGBA('previewColor')
         _previewBackground = colorToRGBA('previewBackground')
@@ -96,16 +99,18 @@ class ViewSettings(QWidget):
         elif not inSettings:
             self.parent.setStyleSheet(styles)
 
-        # BUG: Rubberband not updating on start
+        # Update rubberband color scheme
+        # BUG: Rubberband not updating on start (in live preview)
+        # TODO: Rubberband outline looks bad
         palette = QPalette()
         palette.setBrush(QPalette.Highlight, QBrush(self.selectionBackground))
         self._rubberBand.setPalette(palette)
         self._rubberBand.setBorder(self.selectionBorderColor, self.selectionBorderThickness)
 
-# --------------------------- Settings and Initializations --------------------------- #
+# ------------------------------------- Settings ------------------------------------- #
 
     def restoreSettings(self):
-        self.settings = QSettings("./utils/MangaOCR.ini", QSettings.IniFormat)
+        self.settings = QSettings("./utils/MangaOCR-view.ini", QSettings.IniFormat)
         # Properties and defaults
         self._defaults = {
             # Preview
@@ -133,6 +138,8 @@ class ViewSettings(QWidget):
         }
         for propName, propType in self._properties.items():
             try:
+                # Find the property in settings
+                # Set it as the value if it exists
                 if propType == 'rgba':
                     prop = self.settings.value(propName)
                 elif propType == 'color':
@@ -146,8 +153,12 @@ class ViewSettings(QWidget):
                     self.settings.setValue(propName, prop)
                 else: raise TypeError
             except:
+                # Property does not exist in settings
+                # Use default value
                 setattr(self, propName, self._defaults[propName])
                 self.settings.setValue(propName, self._defaults[propName])
+
+# -------------------------------- UI Initializations -------------------------------- #
 
     def initButtons(self):
 
@@ -216,6 +227,7 @@ class ViewSettings(QWidget):
 # --------------------------- Property Setters and Getters --------------------------- #
 
     def setProperty_(self, objectName, value):
+        # Set the value of a member of this class with name objectName
         self.settings.setValue(objectName, value)
         setattr(self, objectName, value)
         self.updateLiveView()
@@ -252,24 +264,151 @@ class ViewSettings(QWidget):
         i, accepted = QInputDialog.getInt(
             self,
             "Margin/Padding Settings",
-            f"Enter a value between 5 and 50:",
+            f"Enter a value between 5 and 100:",
             value=initialInt,
             min=5,
-            max=50,
+            max=100,
             flags=Qt.CustomizeWindowHint | Qt.WindowTitleHint)
 
         if accepted:
             self.setProperty_(objectName, i)
 
+class HotkeySettings(QWidget):
+
+    class HotkeyContainer(QWidget):
+
+        def __init__(self, shortcutName):
+            super().__init__()
+
+            # Layout and margins
+            self.setLayout(QHBoxLayout(self))
+            self.layout().setAlignment(Qt.AlignTop)
+            _margin = self.layout().contentsMargins()
+            _margin.setBottom(0)
+            _margin.setTop(7)
+            self.layout().setContentsMargins(_margin)
+
+            self.initButtons(shortcutName)
+            self.restoreSettings()
+
+        # ----------------------- Settings and Initializations ----------------------- #
+
+        def initButtons(self, shortcutName):
+            self.shortcutName = QLabel(shortcutName)
+
+            # Modifiers
+            self.shiftCheckBox = QCheckBox("Shift")
+            self.ctrlCheckBox = QCheckBox("Ctrl")
+            self.altCheckBox = QCheckBox("Alt")
+            self.winCheckBox = QCheckBox("Win")
+
+            # Key
+            _validKeyList = ["<Unmapped>", "A", "B", "C", "D", "E", "F", "G", 
+                            "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q",
+                            "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+            self.keyComboBox = QComboBox()
+            self.keyComboBox.addItems(_validKeyList)
+
+            # Layout
+            self.layout().addWidget(self.shortcutName, alignment=Qt.AlignLeft)
+            self.layout().addStretch()
+            self.layout().addWidget(self.shiftCheckBox, alignment=Qt.AlignRight)
+            self.layout().addWidget(self.ctrlCheckBox, alignment=Qt.AlignRight)
+            self.layout().addWidget(self.altCheckBox, alignment=Qt.AlignRight)
+            self.layout().addWidget(self.winCheckBox, alignment=Qt.AlignRight)
+            self.layout().addWidget(self.keyComboBox, alignment=Qt.AlignRight)
+
+        def restoreSettings(self):
+            self.settings = QSettings("./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
+
+            # Properties and defaults
+            _shortcutText = self.shortcutName.text().split(" ")
+            _shortcutName = _shortcutText[0].lower() + "".join(s.title() for s in _shortcutText[1:])
+            self._properties = {
+                f"{_shortcutName}Shift": 'shiftCheckBox',
+                f"{_shortcutName}Ctrl": 'ctrlCheckBox',
+                f"{_shortcutName}Alt": 'altCheckBox',
+                f"{_shortcutName}Cmd": 'winCheckBox',
+                f"{_shortcutName}Key": 'keyComboBox'
+            }
+            self._defaults = {
+                "startCaptureAlt": True,
+                "startCaptureKey": 17 # index of Q in _validKeyList
+            }
+
+            def setObjectState(objectName, objectState):
+                # Check if the object is a checkbox or combo box
+                try:
+                    getattr(self, objectName).setChecked(objectState)
+                except AttributeError:
+                    getattr(self, objectName).setCurrentIndex(objectState)
+
+            for propName, propObject in self._properties.items():
+                try:
+                    # Set default state if it exists
+                    if propName in self._defaults:
+                        setObjectState(propObject, self._defaults[propName])
+                        setattr(self, propName, self._defaults[propName])
+                        continue
+                    # Override default state if saved in settings
+                    prop = self.settings.value(propName)
+                    if prop is not None:
+                        setObjectState(propObject, prop)
+                        setattr(self, propName, prop)
+                        # self.settings.setValue(propName, prop)
+                    else: raise TypeError
+                except:
+                    # No existing default or saved settings
+                    # Therefore, action is unmapped
+                    setObjectState(propObject, 0)
+                    setattr(self, propName, 0)
+                    # self.settings.setValue(propName, 0)
+
+        def saveSettings(self):
+            _shortcut = ""
+            _shortcut += "<shift>+" * self.shiftCheckBox.isChecked()
+            _shortcut += "<ctrl>+" * self.ctrlCheckBox.isChecked()
+            _shortcut += "<alt>+" * self.altCheckBox.isChecked()
+            _shortcut += "<cmd>+" * self.winCheckBox.isChecked()
+
+            _key = self.keyComboBox.currentText()
+            if _key == "<Unmapped>": _key = ""
+            _shortcut += _key
+
+            for propName, _ in self._properties.items():
+                self.settings.setValue(propName, getattr(self, propName))
+
+            _shortcutText = self.shortcutName.text().split(" ")
+            _shortcutName = _shortcutText[0].lower() + "".join(s.title() for s in _shortcutText[1:])
+
+            return _shortcut, _shortcutName
+
+    def __init__(self):
+        super().__init__()
+
+        # Layout and margins
+        self.setLayout(QVBoxLayout(self))
+        self.layout().setAlignment(Qt.AlignTop)
+
+        self.a = self.HotkeyContainer("Start Capture")
+
+        self.layout().addWidget(self.a)
+        self.layout().addWidget(self.HotkeyContainer("Open Settings"))
+        self.layout().addWidget(self.HotkeyContainer("Toggle Logging"))
+        self.layout().addWidget(self.HotkeyContainer("Close Application"))
+
+    def mouseDoubleClickEvent(self, event):
+        self.a.saveSettings()
+        return super().mouseDoubleClickEvent(event)
 
 class SettingsMenu(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.tabs = QTabWidget()
-        self.tabs.addTab(ViewSettings(), "VIEW")
+        self.tabs.addTab(HotkeySettings(), "HOTKEYS")
         self.tabs.addTab(ViewSettings(), "VIEW")
 
         self.setLayout(QVBoxLayout(self))
         self.layout().addWidget(self.tabs)
-        self.setMinimumSize(600, 400)
+        self.setFixedSize(625, 400)
 

@@ -39,7 +39,7 @@
  */
 
 QLabel {
-  font-size: 9pt;
+  font-size: 10pt;
   color: #B5BDBD;
 }
 
@@ -50,6 +50,10 @@ QWidget {
 }
 
 /* Buttons */
+
+QCheckBox {
+  font-size: 10pt;
+}
 
 QPushButton {
   background-color: #31363b;
@@ -100,7 +104,7 @@ QComboBox {
   padding: 0.23em;
   min-width: 2.5em;
   color: #eff0f1;
-  font-size: 9pt;
+  font-size: 10pt;
   background-color: #31363b;
 }
 
@@ -157,7 +161,7 @@ QAbstractSpinBox {
   border-radius: 0.1em;
   min-width: 3em;
   min-height: 1.5em;
-  font-size: 9pt;
+  font-size: 10pt;
 }
 
 QLineEdit {
@@ -168,7 +172,7 @@ QLineEdit {
   border-radius: 0.1em;
   min-width: 3em;
   /* min-height: 1.5em; */
-  font-size: 9pt;
+  font-size: 10pt;
 }
 
 QLineEdit:hover,
