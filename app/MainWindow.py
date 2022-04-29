@@ -57,15 +57,6 @@ class SystemTrayApp(QSystemTrayIcon):
         self.config = config
         self.threadpool = QThreadPool()
 
-        d = {'<alt>+Q': (self, 'startCapture'),
-            '<cmd>+T': (self, 'openSettings'),
-            '<ctrl>+R': (self, 'openSettings'),
-            '<Shift>+Y': (self, 'unbindHotkeys')
-        }
-        self.h = HotKeys(d)
-        self.h.start()
-        self.h.signals.result.connect(self.processGlobalHotkey)
-
         # Menu
         menu = QMenu(parent)
         self.setContextMenu(menu)
@@ -144,6 +135,13 @@ class SystemTrayApp(QSystemTrayIcon):
         # TODO: Destroy settings menu when closed 
         self.settingsMenu = SettingsMenu()
         self.settingsMenu.show()
+    
+    def toggleLogging(self):
+        print("Toggled")
+    
+    def closeApplication(self):
+        print("I was closed")
+
 
 # class SettingsMenu(QWidget):
 

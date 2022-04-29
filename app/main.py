@@ -20,7 +20,7 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QAbstractEventDispatcher
+from PyQt5.QtCore import QAbstractEventDispatcher, QSettings
 from pyqtkeybind import keybinder
 
 from MainWindow import WinEventFilter, SystemTrayApp
@@ -41,7 +41,34 @@ if __name__ == '__main__':
     with open(styles, 'r') as fh:
         app.setStyleSheet(fh.read())
 
+    # TODO: Find a better way to load and unload hotkeys
+    hotkeySettings = QSettings("./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
+    hotkeys = hotkeySettings.value('hotkeys')
+    keybinder.init()
+    if hotkeys:
+        for action, hotkey in hotkeys.items():
+            if hotkey:
+                try:
+                    keybinder.register_hotkey(0, hotkey, getattr(widget, action))
+                except:
+                    pass
+    elif not hotkeys:
+        keybinder.register_hotkey(0, "Alt+Q", widget.startCapture)
+    winEventFilter = WinEventFilter(keybinder)
+    eventDispatcher = QAbstractEventDispatcher.instance()
+    eventDispatcher.installNativeEventFilter(winEventFilter)
+
     widget.show()
     widget.loadModel()
+    app.exec_()
 
-    sys.exit(app.exec_())
+    if hotkeys:
+        for action, hotkey in hotkeys.items():
+            try:
+                keybinder.unregister_hotkey(0, hotkey)
+            except:
+                pass
+    elif not hotkeys:
+        keybinder.unregister_hotkey(0, "Alt+Q")
+
+    sys.exit()

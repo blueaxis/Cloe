@@ -314,7 +314,7 @@ class HotkeySettings(SettingsTab):
             self.shiftCheckBox = QCheckBox("Shift")
             self.ctrlCheckBox = QCheckBox("Ctrl")
             self.altCheckBox = QCheckBox("Alt")
-            self.winCheckBox = QCheckBox("Win")
+            # self.winCheckBox = QCheckBox("Win")
 
             # Key
             _validKeyList = ["<Unmapped>", "A", "B", "C", "D", "E", "F", "G", 
@@ -329,17 +329,17 @@ class HotkeySettings(SettingsTab):
             self.layout().addWidget(self.shiftCheckBox, alignment=Qt.AlignRight)
             self.layout().addWidget(self.ctrlCheckBox, alignment=Qt.AlignRight)
             self.layout().addWidget(self.altCheckBox, alignment=Qt.AlignRight)
-            self.layout().addWidget(self.winCheckBox, alignment=Qt.AlignRight)
+            # self.layout().addWidget(self.winCheckBox, alignment=Qt.AlignRight)
             self.layout().addWidget(self.keyComboBox, alignment=Qt.AlignRight)
 
         # --------------------------------- Settings --------------------------------- #
 
         def saveSettings(self):
             _shortcut = ""
-            _shortcut += "<Shift>+" * self.shiftCheckBox.isChecked()
-            _shortcut += "<Ctrl>+" * self.ctrlCheckBox.isChecked()
-            _shortcut += "<Alt>+" * self.altCheckBox.isChecked()
-            _shortcut += "<Cmd>+" * self.winCheckBox.isChecked()
+            _shortcut += "Shift+" * self.shiftCheckBox.isChecked()
+            _shortcut += "Ctrl+" * self.ctrlCheckBox.isChecked()
+            _shortcut += "Alt+" * self.altCheckBox.isChecked()
+            # _shortcut += "Win+" * self.winCheckBox.isChecked()
 
             _key = self.keyComboBox.currentText()
             if _key == "<Unmapped>": _key = ""
@@ -367,7 +367,7 @@ class HotkeySettings(SettingsTab):
                 f"{_shortcutName}Shift": 'shiftCheckBox',
                 f"{_shortcutName}Ctrl": 'ctrlCheckBox',
                 f"{_shortcutName}Alt": 'altCheckBox',
-                f"{_shortcutName}Cmd": 'winCheckBox',
+                # f"{_shortcutName}Cmd": 'winCheckBox',
                 f"{_shortcutName}Key": 'keyComboBox'
             }
             self._defaults = {
@@ -426,8 +426,11 @@ class HotkeySettings(SettingsTab):
 # ------------------------------------- Settings ------------------------------------- #
 
     def saveSettings(self):
+        _h = {}
         for container in self.containerList:
             hotkey, action = container.saveSettings()
+            _h[action] = hotkey
+        self.settings.setValue('hotkeys', _h)
     
     def loadSettings(self):
         for container in self.containerList:
