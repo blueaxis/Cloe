@@ -17,31 +17,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from shutil import rmtree
-from time import sleep
-
-import toml
 from manga_ocr import MangaOcr
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import (Qt, QAbstractNativeEventFilter, QThreadPool)
-from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QWidgetAction,
-    QVBoxLayout, QWidget, QMainWindow, QApplication)
+from PyQt5.QtCore import (QThreadPool)
+from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QApplication)
 
-
-from utils.config import config, saveOnClose
 from Workers import BaseWorker
-from Ribbon import (Ribbon)
-from Views import (ExternalWindow)
+from Views import ExternalWindow
 from Settings import SettingsMenu
-
-class WinEventFilter(QAbstractNativeEventFilter):
-    def __init__(self, keybinder):
-        self.keybinder = keybinder
-        super().__init__()
-
-    def nativeEventFilter(self, eventType, message):
-        ret = self.keybinder.handler(eventType, message)
-        return ret, 0
 
 
 class SystemTrayApp(QSystemTrayIcon):
@@ -65,6 +48,7 @@ class SystemTrayApp(QSystemTrayIcon):
     def loadModel(self):
         def loadModelHelper():
             import http.client as httplib
+
             def isConnected(url="8.8.8.8"):
                 connection = httplib.HTTPSConnection(url, timeout=2)
                 try:
@@ -78,20 +62,17 @@ class SystemTrayApp(QSystemTrayIcon):
             connected = isConnected()
             if connected:
                 self.showMessage("Please wait",
-                    "Loading the MangaOCR model ...",
-                )
+                                 "Loading the MangaOCR model ...")
                 self.ocrModel = MangaOcr()
             return connected
 
         def modelLoadedConfirmation(connected):
             if connected:
                 self.showMessage("MangaOCR model loaded",
-                    "You are now using the MangaOCR model for Japanese text detection.",
-                )
+                    "You are now using the MangaOCR model for Japanese text detection.")
             elif not connected:
                 self.showMessage("Connection Error",
-                    "Please try again or make sure your Internet connection is on.",
-                )
+                    "Please try again or make sure your Internet connection is on.")
 
         worker = BaseWorker(loadModelHelper)
         worker.signals.result.connect(modelLoadedConfirmation)
@@ -109,70 +90,8 @@ class SystemTrayApp(QSystemTrayIcon):
         self.externalWindow.showFullScreen()
 
     def openSettings(self):
-        # TODO: Destroy settings menu when closed 
         self.settingsMenu = SettingsMenu()
         self.settingsMenu.show()
-    
+
     def closeApplication(self):
         QApplication.instance().exit()
-
-
-# class SettingsMenu(QWidget):
-
-#     def __init__(self, parent=None, tracker=None):
-#         super(QWidget, self).__init__()
-#         self._parent = parent
-#         self.tracker = tracker
-#         self.config = parent.config
-
-#         self.vLayout = QVBoxLayout()
-#         self.ribbon = Ribbon(self, self.tracker)
-#         self.vLayout.addWidget(self.ribbon)
-#         self.setLayout(self.vLayout)
-
-#     # Save configurations on close
-#     def closeEvent(self, event):
-#         saveOnClose(self.config)
-#         self._parent.config = self.config
-#         return super().closeEvent(event)
-
-#     # Noop
-#     def poricomNoop(self):
-#         MessagePopup(
-#             "WIP",
-#             "This function is not yet implemented."
-#         ).exec()
-
-# # ------------------------------- Help Message ------------------------------- #
-
-#     def captureExternalHelper(self):
-#         self.showMinimized()
-#         sleep(0.5)
-#         if self.isMinimized():
-#             self._parent.captureExternal()
-
-# # ---------------------------------- Settings --------------------------------- #
-
-#     def modifyHotkeys(self):
-#         confirmation = PickerPopup(ShortcutPicker(self, self.tracker))
-#         ret = confirmation.exec()
-#         if ret:
-#             MessagePopup(
-#                 "Shortcut Remapped",
-#                 "Close the app to apply changes."
-#             ).exec()
-
-#     def modifyFontSettings(self):
-#         confirmation = PickerPopup(FontPicker(self, self.tracker))
-#         ret = confirmation.exec()
-
-#         if ret:
-#             app = QApplication.instance()
-#             if app is None:
-#                 raise RuntimeError("No Qt Application found.")
-
-#             with open(config["STYLES_DEFAULT"], 'r') as fh:
-#                 app.setStyleSheet(fh.read())
-
-#     def toggleLogging(self):
-#         self.tracker.switchWriteMode()

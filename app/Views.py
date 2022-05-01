@@ -17,16 +17,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtGui import (QPixmap, QPalette, QBrush, QColor, QFont, QPainter, QPen, QCursor)
-from PyQt5.QtCore import (Qt, QTimer, QThreadPool, pyqtSlot, QPoint, QSettings)
-from PyQt5.QtCore import (Qt, QRect, QSize, QTimer, QThreadPool, pyqtSlot)
-from PyQt5.QtWidgets import (QMainWindow,
-    QRubberBand, QGraphicsOpacityEffect, QApplication, QGraphicsView, QLabel)
+from PyQt5.QtGui import (QPixmap, QCursor)
+from PyQt5.QtCore import (Qt, QThreadPool, QTimer,
+                          QPoint, QRect, QSize, pyqtSlot)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QGraphicsView, QLabel)
 
 from Workers import BaseWorker
 from Settings import ViewSettings
 from Preview import CustomBand
 from utils.image_io import logText, pixboxToText
+
 
 class BaseCanvas(QGraphicsView):
 
@@ -135,7 +135,8 @@ class ExternalWindow(QMainWindow):
         super().__init__()
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("border:0px; margin:0px")
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Popup)
+        self.setWindowFlags(Qt.FramelessWindowHint |
+                            Qt.WindowStaysOnTopHint | Qt.Popup)
         self.setAttribute(Qt.WA_NoSystemBackground, True)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         QApplication.setOverrideCursor(QCursor(Qt.CrossCursor))

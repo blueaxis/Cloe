@@ -1,12 +1,12 @@
-from PyQt5.QtGui import (QColor, QPalette, QBrush, QPainter, QPen, QFont)
-from PyQt5.QtCore import (Qt, QSize, QSettings)
-from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorDialog, QFontDialog,
-    QRubberBand, QCheckBox, QGridLayout, QHBoxLayout, QWidget, QTabWidget, QPushButton, QVBoxLayout)
+from PyQt5.QtGui import (QColor, QPainter, QPen)
+from PyQt5.QtCore import (Qt)
+from PyQt5.QtWidgets import (QLabel, QRubberBand, QGridLayout, QWidget)
+
 
 class CustomBand(QRubberBand):
 
-    def __init__(self, shape, parent, 
-        borderColor=Qt.blue, thickness=2, fillColor=QColor(0, 128, 255, 60)):
+    def __init__(self, shape, parent,
+                 borderColor=Qt.blue, thickness=2, fillColor=QColor(0, 128, 255, 60)):
         super().__init__(shape, parent)
         self.setBorder(borderColor, thickness)
         self.setFill(fillColor)
@@ -14,7 +14,7 @@ class CustomBand(QRubberBand):
     def setBorder(self, color, thickness):
         self._borderColor = color
         self._borderThickness = thickness
-    
+
     def setFill(self, color):
         self._fillColor = color
 
@@ -28,6 +28,7 @@ class CustomBand(QRubberBand):
         painter.drawRect(event.rect())
         painter.end()
         # return super().paintEvent(event)
+
 
 class PreviewContainer(QWidget):
 
@@ -44,7 +45,7 @@ class PreviewContainer(QWidget):
     def resizeEvent(self, event):
         if self is not None:
             # Resize rubber band when window size is changed
-            w = 0.4 * self.width() 
+            w = 0.4 * self.width()
             y = 0.05 * self.height()
             x = self.width() - w - y
             h = self.height() - 2*y
@@ -57,12 +58,13 @@ class PreviewContainer(QWidget):
         self.rubberBand = CustomBand(CustomBand.Rectangle, self)
         self.rubberBand.setObjectName("selectionBand")
         self.rubberBand.show()
-    
+
     def createPreviewText(self, text=" Sample Text"):
         self._previewText = QLabel(text)
         self._previewText.setObjectName("previewText")
         self._previewText.adjustSize()
-        self.layout().addWidget(self._previewText, 0, 0, alignment=Qt.AlignTop | Qt.AlignLeft)
+        self.layout().addWidget(self._previewText, 0, 0,
+                                alignment=Qt.AlignTop | Qt.AlignLeft)
 
     def setBackgroundColor(self, color):
         self.backgroundColor = color
@@ -83,10 +85,11 @@ class PreviewContainer(QWidget):
                 if(isWhite):
                     color.setRgb(255, 255, 255, 255)
                 painter.fillRect(x * squareSize, y * squareSize,
-                                squareSize, squareSize, color)
+                                 squareSize, squareSize, color)
                 isWhite = not isWhite
         # Draw true background
-        painter.fillRect(0, 0, self.width(), self.height(), self.backgroundColor)
+        painter.fillRect(0, 0, self.width(), self.height(),
+                         self.backgroundColor)
         # Draw border
         painter.setPen(QPen(QColor(0, 0, 0), 2))
         painter.drawRect(0, 0, self.width(), self.height())

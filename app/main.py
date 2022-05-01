@@ -18,14 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 
-from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QAbstractEventDispatcher, QAbstractNativeEventFilter, QSettings
+from PyQt5.QtCore import (QAbstractEventDispatcher, QAbstractNativeEventFilter, 
+                          QSettings)
+from PyQt5.QtWidgets import QApplication
 from pyqtkeybind import keybinder
 
 from MainWindow import SystemTrayApp
-from Trackers import Tracker
 from utils.config import config
+
 
 class WinEventFilter(QAbstractNativeEventFilter):
     def __init__(self, keybinder):
@@ -35,6 +36,7 @@ class WinEventFilter(QAbstractNativeEventFilter):
     def nativeEventFilter(self, eventType, message):
         ret = self.keybinder.handler(eventType, message)
         return ret, 0
+
 
 if __name__ == '__main__':
 
@@ -50,14 +52,16 @@ if __name__ == '__main__':
         app.setStyleSheet(fh.read())
 
     # TODO: Find a better way to load and unload hotkeys
-    hotkeySettings = QSettings("./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
+    hotkeySettings = QSettings(
+        "./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
     hotkeys = hotkeySettings.value('hotkeys')
     keybinder.init()
     if hotkeys:
         for action, hotkey in hotkeys.items():
             if hotkey:
                 try:
-                    keybinder.register_hotkey(0, hotkey, getattr(widget, action))
+                    keybinder.register_hotkey(
+                        0, hotkey, getattr(widget, action))
                 except:
                     pass
     elif not hotkeys:

@@ -18,10 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from PyQt5.QtCore import (Qt)
-from PyQt5.QtWidgets import (QGridLayout, QVBoxLayout, QWidget, QLabel, QPushButton, QApplication,
-                             QLineEdit, QComboBox, QDialog, QDialogButtonBox, QMessageBox)
-
-from utils.config import (editSelectionConfig, editStylesheet)
+from PyQt5.QtWidgets import (QApplication, QPushButton, QMessageBox)
 
 
 class MessagePopup(QMessageBox):
@@ -31,9 +28,10 @@ class MessagePopup(QMessageBox):
         self.setAttribute(Qt.WA_DeleteOnClose)
 
     def addResetButtons(self):
-        # BUG: This leaves a duplicate icon in the tray bar 
+        # BUG: This leaves a duplicate icon in the tray bar
         def resetApplication():
-            import os, sys
+            import os
+            import sys
             QApplication.instance().quit()
             os.execl(sys.executable, sys.executable, *sys.argv)
         laterButton = QPushButton("Restart Later")

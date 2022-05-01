@@ -19,13 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from os import remove
 
-from PyQt5.QtGui import (QColor, QPalette, QBrush, QPainter, QPen, QFont)
-from PyQt5.QtCore import (Qt, QSize, QSettings)
-from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorDialog, QFontDialog,
-    QRubberBand, QCheckBox, QGridLayout, QHBoxLayout, QWidget, QTabWidget, QPushButton, QVBoxLayout)
+from PyQt5.QtGui import (QColor, QFont)
+from PyQt5.QtCore import (Qt, QSettings)
+from PyQt5.QtWidgets import (QGridLayout, QHBoxLayout, QVBoxLayout,
+                             QWidget, QTabWidget, QLabel, QRubberBand,
+                             QPushButton, QComboBox, QCheckBox,
+                             QInputDialog, QColorDialog, QFontDialog)
 
 from Preview import PreviewContainer
 from Popups import MessagePopup
+
 
 class SettingsTab(QWidget):
     def __init__(self, parent=None):
@@ -97,7 +100,7 @@ class ViewSettings(SettingsTab):
         """
         return styles
 
-    def updateLiveView(self, inSettings = True):
+    def updateLiveView(self, inSettings=True):
 
         def colorToRGBA(objectName):
             # Convert QColor to a QSS string of the following format:
@@ -110,24 +113,24 @@ class ViewSettings(SettingsTab):
         # Update preview text style
         styles = self.stylePreviewText(self.previewFont, self.previewPadding,
             colorToRGBA('previewColor'), colorToRGBA('previewBackground'))
-        
+
         # Update window background color
         # TODO: Window color is not set properly since parent color is different
         # BUG: Styles are not being applied to liveView object
         _windowColor = colorToRGBA('windowColor')
-        
+
         # Set stylesheet and update selection rubberband
         if inSettings:
             self.setStyleSheet(styles)
             self._liveView.rubberBand.setFill(self.selectionBackground)
-            self._liveView.rubberBand.setBorder(self.selectionBorderColor, 
-                self.selectionBorderThickness)
+            self._liveView.rubberBand.setBorder(self.selectionBorderColor,
+                                                self.selectionBorderThickness)
             self._liveView.setBackgroundColor(self.windowColor)
         elif not inSettings:
             self.parent.setStyleSheet(styles)
             self._rubberBand.setFill(self.selectionBackground)
-            self._rubberBand.setBorder(self.selectionBorderColor, 
-                self.selectionBorderThickness)
+            self._rubberBand.setBorder(self.selectionBorderColor,
+                                       self.selectionBorderThickness)
             self.setBackgroundColor(colorToRGBA('windowColor'))
 
     def updateUI(self):
@@ -141,7 +144,8 @@ class ViewSettings(SettingsTab):
             self.settings.setValue(propName, getattr(self, propName))
 
     def loadSettings(self):
-        self.settings = QSettings("./utils/Manga2OCR-view.ini", QSettings.IniFormat)
+        self.settings = QSettings(
+            "./utils/Manga2OCR-view.ini", QSettings.IniFormat)
         # Properties and defaults
         self._defaults = {
             # Preview
@@ -181,7 +185,8 @@ class ViewSettings(SettingsTab):
                     prop = self.settings.value(propName)
                 if self.settings.contains(propName):
                     setattr(self, propName, prop)
-                else: raise TypeError
+                else:
+                    raise TypeError
             except:
                 # Property does not exist in settings
                 # Use default value
@@ -208,12 +213,13 @@ class ViewSettings(SettingsTab):
         self.layout().addWidget(_previewPadding, 0, 7, 1, 2)
 
         # Signals and Slots
-        _previewColor.clicked.connect(lambda: self.getColor_('previewColor'))        
-        _previewBackground.clicked.connect(lambda: self.getColor_('previewBackground'))
+        _previewColor.clicked.connect(lambda: self.getColor_('previewColor'))
+        _previewBackground.clicked.connect(
+            lambda: self.getColor_('previewBackground'))
         _previewFont.clicked.connect(lambda: self.getFont_('previewFont'))
         _previewPadding.clicked.connect(lambda: self.getInt_('previewPadding'))
 
-        # --------------------------- Selection Rubberband --------------------------- #        
+        # --------------------------- Selection Rubberband --------------------------- #
 
         # Button Initializations
         _selectionTitle = QLabel("Selection ")
@@ -230,9 +236,12 @@ class ViewSettings(SettingsTab):
         self.layout().addWidget(_windowColor, 1, 7, 1, 2)
 
         # Signals and Slots
-        _selectionBorderColor.clicked.connect(lambda: self.getColor_('selectionBorderColor'))
-        _selectionBackground.clicked.connect(lambda: self.getColor_('selectionBackground'))
-        _selectionBorderThickness.clicked.connect(lambda: self.getInt_('selectionBorderThickness'))
+        _selectionBorderColor.clicked.connect(
+            lambda: self.getColor_('selectionBorderColor'))
+        _selectionBackground.clicked.connect(
+            lambda: self.getColor_('selectionBackground'))
+        _selectionBorderThickness.clicked.connect(
+            lambda: self.getInt_('selectionBorderThickness'))
         _windowColor.clicked.connect(lambda: self.getColor_('windowColor'))
 
     def initLiveView(self):
@@ -256,7 +265,8 @@ class ViewSettings(SettingsTab):
             initialColor = None
         if initialColor is None:
             initialColor = self._defaults[objectName]
-        color = QColorDialog().getColor(initial=initialColor, options=QColorDialog.ShowAlphaChannel)
+        color = QColorDialog().getColor(initial=initialColor,
+                                        options=QColorDialog.ShowAlphaChannel)
         if color.isValid():
             self.setProperty_(objectName, color)
 
@@ -290,6 +300,7 @@ class ViewSettings(SettingsTab):
         if accepted:
             self.setProperty_(objectName, i)
 
+
 class HotkeySettings(SettingsTab):
 
     class HotkeyContainer(QWidget):
@@ -320,9 +331,9 @@ class HotkeySettings(SettingsTab):
             # self.winCheckBox = QCheckBox("Win")
 
             # Key
-            _validKeyList = ["<Unmapped>", "A", "B", "C", "D", "E", "F", "G", 
-                            "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q",
-                            "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+            _validKeyList = ["<Unmapped>", "A", "B", "C", "D", "E", "F", "G",
+                             "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q",
+                             "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
             self.keyComboBox = QComboBox()
             self.keyComboBox.addItems(_validKeyList)
 
@@ -345,7 +356,8 @@ class HotkeySettings(SettingsTab):
             # _shortcut += "Win+" * self.winCheckBox.isChecked()
 
             _key = self.keyComboBox.currentText()
-            if _key == "<Unmapped>": _key = ""
+            if _key == "<Unmapped>":
+                _key = ""
             _shortcut += _key
 
             for propName, propObject in self._properties.items():
@@ -356,16 +368,19 @@ class HotkeySettings(SettingsTab):
                 self.settings.setValue(propName, int(prop))
 
             _shortcutText = self.shortcutName.text().split(" ")
-            _shortcutName = _shortcutText[0].lower() + "".join(s.title() for s in _shortcutText[1:])
+            _shortcutName = _shortcutText[0].lower(
+            ) + "".join(s.title() for s in _shortcutText[1:])
 
             return _shortcut, _shortcutName
 
         def loadSettings(self):
-            self.settings = QSettings("./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
+            self.settings = QSettings(
+                "./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
 
             # Properties and defaults
             _shortcutText = self.shortcutName.text().split(" ")
-            _shortcutName = _shortcutText[0].lower() + "".join(s.title() for s in _shortcutText[1:])
+            _shortcutName = _shortcutText[0].lower(
+            ) + "".join(s.title() for s in _shortcutText[1:])
             self._properties = {
                 f"{_shortcutName}Shift": 'shiftCheckBox',
                 f"{_shortcutName}Ctrl": 'ctrlCheckBox',
@@ -375,7 +390,7 @@ class HotkeySettings(SettingsTab):
             }
             self._defaults = {
                 "startCaptureAlt": True,
-                "startCaptureKey": 17 # index of Q in _validKeyList
+                "startCaptureKey": 17  # index of Q in _validKeyList
             }
 
             def setObjectState(objectName, objectState):
@@ -391,7 +406,8 @@ class HotkeySettings(SettingsTab):
                     if self.settings.contains(propName):
                         prop = self.settings.value(propName, type=int)
                         setObjectState(propObject, prop)
-                    else: raise TypeError
+                    else:
+                        raise TypeError
                 except:
                     # Set default state if it exists
                     if propName in self._defaults:
@@ -405,7 +421,8 @@ class HotkeySettings(SettingsTab):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.settings = QSettings("./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
+        self.settings = QSettings(
+            "./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
 
         # Layout and margins
         self.setLayout(QGridLayout(self))
@@ -435,14 +452,15 @@ class HotkeySettings(SettingsTab):
             _h[action] = hotkey
         self.settings.setValue('hotkeys', _h)
         _m = MessagePopup("Configuration Saved",
-            "Restart the application to apply the changes.",
-            MessagePopup.Ok)
+                          "Restart the application to apply the changes.",
+                          MessagePopup.Ok)
         # _m.addResetButtons()
         _m.exec()
-    
+
     def loadSettings(self):
         for container in self.containerList:
             container.loadSettings()
+
 
 class SettingsMenu(QWidget):
     def __init__(self, parent=None):
@@ -456,4 +474,3 @@ class SettingsMenu(QWidget):
         self.setLayout(QVBoxLayout(self))
         self.layout().addWidget(self.tabs)
         self.setFixedSize(625, 400)
-
