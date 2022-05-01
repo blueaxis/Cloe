@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (QComboBox, QLineEdit, QLabel, QInputDialog, QColorD
     QRubberBand, QCheckBox, QGridLayout, QHBoxLayout, QWidget, QTabWidget, QPushButton, QVBoxLayout)
 
 from Preview import PreviewContainer
+from Popups import MessagePopup
 
 class SettingsTab(QWidget):
     def __init__(self, parent=None):
@@ -416,7 +417,7 @@ class HotkeySettings(SettingsTab):
     def addHotkeyContainers(self):
         self.containerList = []
         _actionList = ["Start Capture",
-                       "Toggle Logging",
+                       # "Toggle Logging",
                        "Open Settings",
                        "Close Application"]
         for _action in _actionList:
@@ -431,6 +432,11 @@ class HotkeySettings(SettingsTab):
             hotkey, action = container.saveSettings()
             _h[action] = hotkey
         self.settings.setValue('hotkeys', _h)
+        _m = MessagePopup("Configuration Saved",
+            "Restart the application to apply the changes.",
+            MessagePopup.Ok)
+        # _m.addResetButtons()
+        _m.exec()
     
     def loadSettings(self):
         for container in self.containerList:

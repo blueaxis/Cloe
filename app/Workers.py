@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from PyQt5.QtCore import (QRunnable, QObject, pyqtSignal, pyqtSlot)
-from pynput.keyboard import GlobalHotKeys
 
 
 class BaseWorker(QRunnable):
@@ -39,16 +38,3 @@ class BaseWorker(QRunnable):
 class WorkerSignal(QObject):
     finished = pyqtSignal()
     result = pyqtSignal(object)
-
-
-class HotKeys(GlobalHotKeys):
-
-    def __init__(self, hotkeys, *args, **kwargs):
-        for h in hotkeys:
-            object_, method_ = hotkeys[h]
-            hotkeys[h] = lambda o=object_, m=method_: self.onPress(o, m)
-        super().__init__(hotkeys, *args, **kwargs)
-        self.signals = WorkerSignal()
-
-    def onPress(self, object_, method_):
-        self.signals.result.emit((object_, method_))

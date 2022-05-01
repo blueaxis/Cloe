@@ -33,8 +33,6 @@ from Workers import BaseWorker
 from Ribbon import (Ribbon)
 from Views import (ExternalWindow)
 from Settings import SettingsMenu
-from Popups import (ShortcutPicker, FontPicker, PickerPopup, MessagePopup)
-from Workers import HotKeys
 
 class WinEventFilter(QAbstractNativeEventFilter):
     def __init__(self, keybinder):
@@ -53,7 +51,6 @@ class SystemTrayApp(QSystemTrayIcon):
         QSystemTrayIcon.__init__(self, icon, parent)
 
         # State trackers and configurations
-        self.config = config
         self.threadpool = QThreadPool()
         self.ocrModel = None
 
@@ -115,9 +112,6 @@ class SystemTrayApp(QSystemTrayIcon):
         # TODO: Destroy settings menu when closed 
         self.settingsMenu = SettingsMenu()
         self.settingsMenu.show()
-    
-    def toggleLogging(self):
-        print("Toggled")
     
     def closeApplication(self):
         QApplication.instance().exit()
