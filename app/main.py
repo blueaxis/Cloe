@@ -20,12 +20,21 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QAbstractEventDispatcher, QSettings
+from PyQt5.QtCore import QAbstractEventDispatcher, QAbstractNativeEventFilter, QSettings
 from pyqtkeybind import keybinder
 
-from MainWindow import WinEventFilter, SystemTrayApp
+from MainWindow import SystemTrayApp
 from Trackers import Tracker
 from utils.config import config
+
+class WinEventFilter(QAbstractNativeEventFilter):
+    def __init__(self, keybinder):
+        self.keybinder = keybinder
+        super().__init__()
+
+    def nativeEventFilter(self, eventType, message):
+        ret = self.keybinder.handler(eventType, message)
+        return ret, 0
 
 if __name__ == '__main__':
 
@@ -34,8 +43,7 @@ if __name__ == '__main__':
     app.setWindowIcon(QIcon(config["LOGO"]))
     app.setQuitOnLastWindowClosed(False)
 
-    tracker = Tracker()
-    widget = SystemTrayApp(parent=None, tracker=tracker)
+    widget = SystemTrayApp(parent=None)
 
     styles = config["STYLES_DEFAULT"]
     with open(styles, 'r') as fh:

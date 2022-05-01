@@ -30,10 +30,9 @@ from utils.image_io import logText, pixboxToText
 
 class BaseCanvas(QGraphicsView):
 
-    def __init__(self, parent=None, tracker=None):
+    def __init__(self, parent=None):
         QGraphicsView.__init__(self, parent)
         self.parent = parent
-        self.tracker = tracker
 
         self._timer = QTimer()
         self._timer.setInterval(300)
@@ -69,10 +68,9 @@ class BaseCanvas(QGraphicsView):
             self._rubberBand.setGeometry(
                 QRect(self._initialPoint, event.pos()).normalized())
 
-            logPath = self.tracker.filepath + "/log.txt"
-            logToFile = self.tracker.writeMode
+            # TODO: Track log path and log mode in QSettings instead
             text = self._canvasText.text()
-            logText(text, mode=logToFile, path=logPath)
+            logText(text)
             self._rubberBand.hide()
             self._canvasText.hide()
 
@@ -86,20 +84,14 @@ class BaseCanvas(QGraphicsView):
             self._canvasText.adjustSize()
             self._canvasText.show()
 
-        lang = self.tracker.language + self.tracker.orientation
-
         screen = QApplication.primaryScreen()
         s = screen.size()
         self.pixmap = screen.grabWindow(0).scaled(s.width(), s.height())
         pixbox = self.pixmap.copy(self._rubberBand.geometry())
 
-        _worker = BaseWorker(pixboxToText, pixbox, lang, self.tracker.ocrModel)
+        _worker = BaseWorker(pixboxToText, pixbox, self.parent.ocrModel)
         _worker.signals.result.connect(self.ocrFinished)
-        #_worker.signals.result.connect(self._canvasText.setText)
-        #_worker.signals.finished.connect(self._canvasText.adjustSize)
         self._timer.timeout.disconnect(self.rubberBandStopped)
-        #_worker.signals.finished.connect(
-        #    lambda: self._timer.timeout.connect(self.rubberBandStopped))
         QThreadPool.globalInstance().start(_worker)
 
     def closeEvent(self, event):
@@ -118,8 +110,8 @@ class BaseCanvas(QGraphicsView):
 
 class FullScreen(BaseCanvas, ViewSettings):
 
-    def __init__(self, parent=None, tracker=None):
-        BaseCanvas.__init__(self, parent, tracker)
+    def __init__(self, parent=None):
+        BaseCanvas.__init__(self, parent)
 
         # View Initializations
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -137,15 +129,16 @@ class FullScreen(BaseCanvas, ViewSettings):
 
 
 class ExternalWindow(QMainWindow):
-    def __init__(self, tracker):
+    def __init__(self, parent):
         super().__init__()
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("border:0px; margin:0px")
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_NoSystemBackground, True)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setCentralWidget(FullScreen(self))
 
-        self.setCentralWidget(FullScreen(self, tracker))
+        self.ocrModel = parent.ocrModel
 
     def closeEvent(self, event):
         # Ensure that object is deleted before closing

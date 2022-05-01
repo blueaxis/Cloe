@@ -21,13 +21,10 @@ from io import BytesIO
 
 from PyQt5.QtCore import QBuffer
 from PyQt5.QtGui import QGuiApplication
-from tesserocr import PyTessBaseAPI
 from PIL import Image
 
-from utils.config import config
 
-
-def pixboxToText(pixmap, lang="jpn_vert", model=None):
+def pixboxToText(pixmap, model=None):
 
     buffer = QBuffer()
     buffer.open(QBuffer.ReadWrite)
@@ -42,14 +39,6 @@ def pixboxToText(pixmap, lang="jpn_vert", model=None):
 
     if model is not None:
         text = model(pillowImage)
-
-    # PSM = 1 works most of the time except on smaller bounding boxes.
-    # By smaller, we mean textboxes with less text. Usually these
-    # boxes have at most one vertical line of text.
-    else:
-        with PyTessBaseAPI(path=config["LANG_PATH"], lang=lang, oem=1, psm=1) as api:
-            api.SetImage(pillowImage)
-            text = api.GetUTF8Text()
 
     return text.strip()
 

@@ -48,14 +48,14 @@ class WinEventFilter(QAbstractNativeEventFilter):
 
 class SystemTrayApp(QSystemTrayIcon):
 
-    def __init__(self, parent=None, tracker=None):
+    def __init__(self, parent=None):
         icon = QIcon("./assets/images/icons/logo.ico")
         QSystemTrayIcon.__init__(self, icon, parent)
 
         # State trackers and configurations
-        self.tracker = tracker
         self.config = config
         self.threadpool = QThreadPool()
+        self.ocrModel = None
 
         # Menu
         menu = QMenu(parent)
@@ -63,72 +63,52 @@ class SystemTrayApp(QSystemTrayIcon):
 
         # Menu Actions
         menu.addAction("Settings", self.openSettings)
-        menu.addAction("Exit", QApplication.instance().exit)
-
-    def unbindHotkeys(self):
-        self.h.stop()
-
-    def processGlobalHotkey(self, objectMethod):
-        object_, method_ = objectMethod
-        getattr(object_, method_)()
+        menu.addAction("Exit", self.closeApplication)
 
     def loadModel(self):
-        def loadModelHelper(tracker):
-            betterOCR = tracker.switchOCRMode()
-            if betterOCR:
-                import http.client as httplib
+        def loadModelHelper():
+            import http.client as httplib
+            def isConnected(url="8.8.8.8"):
+                connection = httplib.HTTPSConnection(url, timeout=2)
+                try:
+                    connection.request("HEAD", "/")
+                    return True
+                except Exception:
+                    return False
+                finally:
+                    connection.close()
 
-                def isConnected(url="8.8.8.8"):
-                    connection = httplib.HTTPSConnection(url, timeout=2)
-                    try:
-                        connection.request("HEAD", "/")
-                        return True
-                    except Exception:
-                        return False
-                    finally:
-                        connection.close()
-
-                connected = isConnected()
-                if connected:
-                    tracker.ocrModel = MangaOcr()
-                return (betterOCR, connected)
-            else:
-                tracker.ocrModel = None
-                return (betterOCR, True)
-
-        def modelLoadedConfirmation(typeConnectionTuple):
-            usingMangaOCR, connected = typeConnectionTuple
-            modelName = "MangaOCR" if usingMangaOCR else "Tesseract"
+            connected = isConnected()
             if connected:
-                self.showMessage(
-                    f"{modelName} model loaded",
-                    f"You are now using the {modelName} model for Japanese text detection."
+                self.showMessage("Please wait",
+                    "Loading the MangaOCR model ...",
                 )
+                self.ocrModel = MangaOcr()
+            return connected
 
+        def modelLoadedConfirmation(connected):
+            if connected:
+                self.showMessage("MangaOCR model loaded",
+                    "You are now using the MangaOCR model for Japanese text detection.",
+                )
             elif not connected:
-                self.showMessage(
-                    "Connection Error",
-                    "Please try again or make sure your Internet connection is on."
+                self.showMessage("Connection Error",
+                    "Please try again or make sure your Internet connection is on.",
                 )
 
-        self.showMessage(
-            "Please wait",
-            "Loading the MangaOCR model ..."
-        )
-
-        worker = BaseWorker(loadModelHelper, self.tracker)
+        worker = BaseWorker(loadModelHelper)
         worker.signals.result.connect(modelLoadedConfirmation)
         self.threadpool.start(worker)
 
     def startCapture(self):
 
-        if self.tracker.ocrModel == None:
+        if self.ocrModel == None:
             self.showMessage(
                 "MangaOCR model not yet loaded",
                 "Please wait until the MangaOCR model is loaded."
             )
             return
-        self.externalWindow = ExternalWindow(self.tracker)
+        self.externalWindow = ExternalWindow(self)
         self.externalWindow.showFullScreen()
 
     def openSettings(self):
@@ -140,7 +120,7 @@ class SystemTrayApp(QSystemTrayIcon):
         print("Toggled")
     
     def closeApplication(self):
-        print("I was closed")
+        QApplication.instance().exit()
 
 
 # class SettingsMenu(QWidget):
