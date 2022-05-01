@@ -122,11 +122,13 @@ class ViewSettings(SettingsTab):
             self._liveView.rubberBand.setFill(self.selectionBackground)
             self._liveView.rubberBand.setBorder(self.selectionBorderColor, 
                 self.selectionBorderThickness)
+            self._liveView.setBackgroundColor(self.windowColor)
         elif not inSettings:
             self.parent.setStyleSheet(styles)
             self._rubberBand.setFill(self.selectionBackground)
             self._rubberBand.setBorder(self.selectionBorderColor, 
                 self.selectionBorderThickness)
+            self.setBackgroundColor(colorToRGBA('windowColor'))
 
     def updateUI(self):
         self.loadSettings()
@@ -151,7 +153,7 @@ class ViewSettings(SettingsTab):
             'selectionBorderColor': QColor(0, 128, 255, 255),
             'selectionBorderThickness': 2,
             'selectionBackground': QColor(0, 128, 255, 60),
-            'windowColor': QColor(255, 255, 255, 3)
+            'windowColor': QColor(255, 255, 255, 13)
         }
         self._properties = {
             # Preview

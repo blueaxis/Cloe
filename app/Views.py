@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtGui import (QPixmap, QPalette, QBrush, QColor, QFont, QPainter, QPen)
+from PyQt5.QtGui import (QPixmap, QPalette, QBrush, QColor, QFont, QPainter, QPen, QCursor)
 from PyQt5.QtCore import (Qt, QTimer, QThreadPool, pyqtSlot, QPoint, QSettings)
 from PyQt5.QtCore import (Qt, QRect, QSize, QTimer, QThreadPool, pyqtSlot)
 from PyQt5.QtWidgets import (QMainWindow,
@@ -116,12 +116,14 @@ class FullScreen(BaseCanvas, ViewSettings):
         # View Initializations
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setGraphicsEffect(QGraphicsOpacityEffect(opacity=0.05))
 
         # Restore settings and update view
         self._liveView = None
         self.loadSettings()
         self.updateLiveView(inSettings=False)
+
+    def setBackgroundColor(self, color):
+        self.setStyleSheet(f"background-color: {color}")
 
     def mouseReleaseEvent(self, event):
         BaseCanvas.mouseReleaseEvent(self, event)
@@ -133,9 +135,11 @@ class ExternalWindow(QMainWindow):
         super().__init__()
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("border:0px; margin:0px")
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Popup)
         self.setAttribute(Qt.WA_NoSystemBackground, True)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
+        QApplication.setOverrideCursor(QCursor(Qt.CrossCursor))
+
         self.setCentralWidget(FullScreen(self))
 
         self.ocrModel = parent.ocrModel
@@ -143,4 +147,6 @@ class ExternalWindow(QMainWindow):
     def closeEvent(self, event):
         # Ensure that object is deleted before closing
         self.deleteLater()
+        # Restore cursor
+        QApplication.restoreOverrideCursor()
         return super().closeEvent(event)

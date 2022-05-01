@@ -63,3 +63,33 @@ class PreviewContainer(QWidget):
         self._previewText.setObjectName("previewText")
         self._previewText.adjustSize()
         self.layout().addWidget(self._previewText, 0, 0, alignment=Qt.AlignTop | Qt.AlignLeft)
+
+    def setBackgroundColor(self, color):
+        self.backgroundColor = color
+
+    def paintEvent(self, event):
+        painter = QPainter()
+        painter.begin(self)
+
+        # Draw alpha background
+        # Adopted from: https://sourceforge.net/projects/capture2text/
+        squareSize = 20
+        numSquaresX = int(self.width() / squareSize) + 1
+        numSquaresY = int(self.height() / squareSize) + 1
+        for y in range(numSquaresY):
+            isWhite = ((y % 2) == 0)
+            for x in range(numSquaresX):
+                color = QColor(200, 200, 200, 255)
+                if(isWhite):
+                    color.setRgb(255, 255, 255, 255)
+                painter.fillRect(x * squareSize, y * squareSize,
+                                squareSize, squareSize, color)
+                isWhite = not isWhite
+        # Draw true background
+        painter.fillRect(0, 0, self.width(), self.height(), self.backgroundColor)
+        # Draw border
+        painter.setPen(QPen(QColor(0, 0, 0), 2))
+        painter.drawRect(0, 0, self.width(), self.height())
+
+        painter.end()
+        return super().paintEvent(event)
