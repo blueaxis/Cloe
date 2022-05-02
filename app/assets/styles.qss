@@ -85,6 +85,28 @@ QPushButton:pressed {
   color: #eff0f1;
 }
 
+/* Menu */
+QMenu {
+  color: #31363b;
+  margin: 0.09em;
+  font-size: 9.5pt;
+}
+
+QMenu::icon {
+  margin: 0.23em;
+}
+
+QMenu::item {
+  padding: 0.23em 1.5em 0.23em 1.3em;
+  border: 0.09em solid transparent;
+  background: transparent;
+}
+
+QMenu::item:selected {
+  color: #31363b;
+  background-color: rgba(135, 143, 230, 0.5);
+}
+
 /* Dialog */
 
 QTabWidget QPushButton,

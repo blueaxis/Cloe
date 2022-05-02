@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QApplication)
 from Workers import BaseWorker
 from Views import ExternalWindow
 from Settings import SettingsMenu
+from Popups import AboutPage
 
 
 class SystemTrayApp(QSystemTrayIcon):
@@ -42,8 +43,13 @@ class SystemTrayApp(QSystemTrayIcon):
         self.setContextMenu(menu)
 
         # Menu Actions
-        menu.addAction("Settings", self.openSettings)
-        menu.addAction("Exit", self.closeApplication)
+        menu.addAction(QIcon("./assets/images/icons/settings.png"),
+            "Settings", self.openSettings)
+        menu.addSeparator()
+        menu.addAction(QIcon("./assets/images/icons/about.png"),
+            "About Chloe", self.openAbout)
+        menu.addAction(QIcon("./assets/images/icons/exit.png"),
+            "Exit", self.closeApplication)
 
     def loadModel(self):
         def loadModelHelper():
@@ -92,6 +98,9 @@ class SystemTrayApp(QSystemTrayIcon):
     def openSettings(self):
         self.settingsMenu = SettingsMenu()
         self.settingsMenu.show()
+    
+    def openAbout(self):
+        AboutPage().exec()
 
     def closeApplication(self):
         QApplication.instance().exit()
