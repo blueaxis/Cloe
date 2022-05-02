@@ -16,7 +16,7 @@
 ## About <a name = "about"></a>
 Inspired by [Capture2Text](http://capture2text.sourceforge.net/), Cloe is a snipping tool for the [Manga OCR library](https://pypi.org/project/manga-ocr/). The project works similarly to Capture2Text but uses the MangaOCR model instead. See demo below to see how it works.
 
-https://user-images.githubusercontent.com/45705751/161961152-29070fde-03f6-42a7-8569-0ff22ae9b014.mp4
+https://user-images.githubusercontent.com/45705751/166183555-ef11bf64-9cea-4c04-8a71-2293065d644c.mp4
 
 ## User Guide  <a name="user_guide"></a>
 Launch the application and wait for the model to load. Show the snipping window using shortcut `Alt+Q` and drag and hold the mouse cursor to start performing OCR.
