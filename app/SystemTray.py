@@ -1,5 +1,5 @@
 """
-Poricom Main Window Component
+Cloe Main Application
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 

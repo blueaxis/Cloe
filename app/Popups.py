@@ -1,5 +1,5 @@
 """
-Poricom Popup Components
+Cloe Popup Components
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 

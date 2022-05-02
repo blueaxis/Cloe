@@ -1,5 +1,6 @@
 """
-Poricom
+Cloe
+
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
 This program is free software: you can redistribute it and/or modify
@@ -24,7 +25,7 @@ from PyQt5.QtCore import (QAbstractEventDispatcher, QAbstractNativeEventFilter,
 from PyQt5.QtWidgets import QApplication
 from pyqtkeybind import keybinder
 
-from MainWindow import SystemTrayApp
+from SystemTray import SystemTrayApp
 from utils.config import config
 
 
@@ -41,7 +42,7 @@ class WinEventFilter(QAbstractNativeEventFilter):
 if __name__ == '__main__':
 
     app = QApplication(sys.argv)
-    app.setApplicationName("Poricom")
+    app.setApplicationName("Cloe")
     app.setWindowIcon(QIcon(config["LOGO"]))
     app.setQuitOnLastWindowClosed(False)
 

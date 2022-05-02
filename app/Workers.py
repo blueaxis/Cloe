@@ -1,5 +1,5 @@
 """
-Poricom Multithreaded Workers
+Cloe Multithreaded Workers
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
