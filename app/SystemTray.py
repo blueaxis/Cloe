@@ -22,11 +22,10 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import (QSettings, QThreadPool)
 from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QApplication)
 
-from Workers import BaseWorker
+from components.services import BaseWorker, Hotkeys
 from Views import ExternalWindow
 from Settings import SettingsMenu
 from Popups import AboutPage
-from Hotkeys import HotKeys
 
 
 class SystemTrayApp(QSystemTrayIcon):
@@ -64,7 +63,7 @@ class SystemTrayApp(QSystemTrayIcon):
             self.hotkeys.stop()
         except Exception:
             pass
-        self.hotkeys = HotKeys(self.getHotkeys())
+        self.hotkeys = Hotkeys(self.getHotkeys())
         self.hotkeys.start()
         self.hotkeys.signals.result.connect(self.processGlobalHotkey)
 

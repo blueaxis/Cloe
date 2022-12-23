@@ -22,7 +22,7 @@ from PyQt5.QtCore import (Qt, QThreadPool, QTimer,
                           QPoint, QRect, QSize, pyqtSlot)
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QGraphicsView, QLabel)
 
-from Workers import BaseWorker
+from components.services import BaseWorker
 from Settings import ViewSettings
 from Preview import CustomBand
 from utils.scripts import logText, pixmapToText

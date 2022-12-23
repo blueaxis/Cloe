@@ -1,5 +1,5 @@
 """
-Cloe Global Hotkeys
+Cloe Signals
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -17,19 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from pynput.keyboard import GlobalHotKeys
-
-from Workers import WorkerSignal
+from PyQt5.QtCore import (QObject, pyqtSignal)
 
 
-class HotKeys(GlobalHotKeys):
-
-    def __init__(self, hotkeys, *args, **kwargs):
-        for h in hotkeys:
-            obj, func = hotkeys[h]
-            hotkeys[h] = lambda o=obj, f=func: self.onPress(o, f)
-        super().__init__(hotkeys, *args, **kwargs)
-        self.signals = WorkerSignal()
-
-    def onPress(self, obj, func):
-        self.signals.result.emit((obj, func))
+class BaseWorkerSignal(QObject):
+    finished = pyqtSignal()
+    result = pyqtSignal(object)
