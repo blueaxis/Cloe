@@ -1,5 +1,5 @@
 """
-Cloe Components
+Cloe About Popup Component
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -17,4 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from .popups import AboutPopup, BasePopup
+from .base import BasePopup
+from utils.constants import ABOUT_MESSAGE, APP_NAME
+
+class AboutPopup(BasePopup):
+    def __init__(self):
+        super().__init__(f"About {APP_NAME}", ABOUT_MESSAGE)

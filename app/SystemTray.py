@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QApplication)
 from components.services import BaseWorker, Hotkeys
 from Views import ExternalWindow
 from Settings import SettingsMenu
-from Popups import AboutPage
+from components import AboutPopup
 
 
 class SystemTrayApp(QSystemTrayIcon):
@@ -55,8 +55,8 @@ class SystemTrayApp(QSystemTrayIcon):
         self.settingsMenu = None
 
     def processGlobalHotkey(self, objectMethod):
-        obj, method = objectMethod
-        getattr(obj, method)()
+        obj, fn = objectMethod
+        getattr(obj, fn)()
 
     def loadHotkeys(self):
         try:
@@ -77,7 +77,6 @@ class SystemTrayApp(QSystemTrayIcon):
                     hotkeyDict[hotkey] = (self, action)
         elif not hotkeys:
             hotkeyDict["<Alt>+Q"] = (self, 'startCapture')
-            hotkeyDict["<Alt>+Z"] = (self, 'loadHotkeys')
         return hotkeyDict
 
     def loadModel(self):
@@ -130,7 +129,7 @@ class SystemTrayApp(QSystemTrayIcon):
             self.settingsMenu.show()
 
     def openAbout(self):
-        AboutPage().exec()
+        AboutPopup().exec()
 
     def closeApplication(self):
         QApplication.instance().exit()

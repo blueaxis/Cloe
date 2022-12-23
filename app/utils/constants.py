@@ -17,8 +17,30 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+# General
+APP_NAME = "Cloe"
+
 # Images and styles
 APP_LOGO = "./assets/images/icons/logo.ico"
 STYLESHEET_LIGHT = "./assets/styles.qss"
 STYLESHEET_DARK = "./assets/styles-dark.qss"
 STYLESHEET_DEFAULT = "./assets/styles.qss"
+
+# Popups
+ABOUT_MESSAGE = ("Inspired by <a href='http://capture2text.sourceforge.net/'>"
+                "Capture2Text</a>, Cloe is a snipping tool for the "
+                "<a href='https://pypi.org/project/manga-ocr'>MangaOCR library</a>."
+                " The project works similarly to Capture2Text but uses the MangaOCR"
+                " model instead.\n\n Acknowledgments:\n\n"
+                "This project will not be possible without the MangaOCR model by "
+                "<a href='https://github.com/kha-white'>Maciej Budyś</a>.\n"
+                "The software is licensed under GPLv3 (see "
+                "<a href='https://github.com/bluaxees/Cloe/blob/main/LICENSE'>"
+                "LICENSE</a> and uses third party libraries that are distributed "
+                "under their own terms (see <a href='"
+                "https://github.com/bluaxees/Cloe/blob/main/LICENSE-3RD-PARTY'"
+                "> LICENSE-3RD-PARTY</a>.\n The icons used in this project are made"
+                " by <a href='https://icons8.com'> Icons8 </a>: "
+                "<a href='https://icons8.com/icon/aPtgRkkLiNl2/settings'>settings</a>"
+                ", <a href='https://icons8.com/icon/45/close'>close</a>, and "
+                "<a href='https://icons8.com/icon/DHTiJWmR3fPx/about'>about</a>.")

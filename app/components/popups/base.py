@@ -1,5 +1,5 @@
 """
-Cloe Components
+Cloe Base Popup Component
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -17,4 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from .popups import AboutPopup, BasePopup
+from PyQt5.QtCore import (Qt)
+from PyQt5.QtWidgets import (QMessageBox)
+
+
+class BasePopup(QMessageBox):
+    def __init__(self, title: str, message: str,
+                buttons: QMessageBox.StandardButtons = QMessageBox.Ok, *args, **kwargs):
+        super().__init__(QMessageBox.NoIcon, title, message, buttons, *args, **kwargs)
+        self.setAttribute(Qt.WA_DeleteOnClose)

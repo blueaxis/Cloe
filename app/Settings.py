@@ -27,8 +27,7 @@ from PyQt5.QtWidgets import (QGridLayout, QHBoxLayout, QVBoxLayout,
                              QInputDialog, QColorDialog, QFontDialog)
 
 from Preview import PreviewContainer
-from Popups import MessagePopup
-
+from components import BasePopup
 
 class SettingsTab(QWidget):
     def __init__(self, parent=None):
@@ -446,16 +445,13 @@ class HotkeySettings(SettingsTab):
 # ------------------------------------- Settings ------------------------------------- #
 
     def saveSettings(self):
-        _h = {}
+        hotkeys = {}
         for container in self.containerList:
             hotkey, action = container.saveSettings()
-            _h[action] = hotkey
-        self.settings.setValue('hotkeys', _h)
-        _m = MessagePopup("Configuration Saved",
-                          "New shortcuts have been applied.",
-                          MessagePopup.Ok)
-        # _m.addResetButtons()
-        _m.exec()
+            hotkeys[action] = hotkey
+        self.settings.setValue('hotkeys', hotkeys)
+        message = BasePopup("Configuration Saved", "New shortcuts have been applied.")
+        message.exec()
         self.parent.onSaveHotkeys()
 
     def loadSettings(self):
