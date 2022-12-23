@@ -13,6 +13,7 @@ pillow = "^9.3.0"
 manga-ocr = "^0.1.8"
 pyqtkeybind = "^0.0.9"
 toml = "^0.10.2"
+pynput = "^1.7.6"
 
 
 [tool.poetry.group.dev.dependencies]
