@@ -1,5 +1,5 @@
 """
-Cloe
+Cloe Global Hotkeys
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -17,28 +17,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import sys
+from pynput.keyboard import GlobalHotKeys
 
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication
+from Workers import WorkerSignal
 
-from SystemTray import SystemTrayApp
-from utils.config import config
 
-if __name__ == '__main__':
+class HotKeys(GlobalHotKeys):
 
-    app = QApplication(sys.argv)
-    app.setApplicationName("Cloe")
-    app.setWindowIcon(QIcon(config["LOGO"]))
-    app.setQuitOnLastWindowClosed(False)
+    def __init__(self, hotkeys, *args, **kwargs):
+        for h in hotkeys:
+            obj, func = hotkeys[h]
+            hotkeys[h] = lambda o=obj, f=func: self.onPress(o, f)
+        super().__init__(hotkeys, *args, **kwargs)
+        self.signals = WorkerSignal()
 
-    widget = SystemTrayApp(parent=None)
-
-    styles = config["STYLES_DEFAULT"]
-    with open(styles, 'r') as fh:
-        app.setStyleSheet(fh.read())
-    
-    widget.show()
-    widget.loadModel()
-    app.exec_()
-    sys.exit()
+    def onPress(self, obj, func):
+        self.signals.result.emit((obj, func))

@@ -19,13 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from manga_ocr import MangaOcr
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import (QThreadPool)
+from PyQt5.QtCore import (QSettings, QThreadPool)
 from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QApplication)
 
 from Workers import BaseWorker
 from Views import ExternalWindow
 from Settings import SettingsMenu
 from Popups import AboutPage
+from Hotkeys import HotKeys
 
 
 class SystemTrayApp(QSystemTrayIcon):
@@ -37,6 +38,7 @@ class SystemTrayApp(QSystemTrayIcon):
         # State trackers and configurations
         self.threadpool = QThreadPool()
         self.ocrModel = None
+        self.loadHotkeys()
 
         # Menu
         menu = QMenu(parent)
@@ -50,6 +52,34 @@ class SystemTrayApp(QSystemTrayIcon):
             "About Chloe", self.openAbout)
         menu.addAction(QIcon("./assets/images/icons/exit.png"),
             "Exit", self.closeApplication)
+        
+        self.settingsMenu = None
+
+    def processGlobalHotkey(self, objectMethod):
+        obj, method = objectMethod
+        getattr(obj, method)()
+
+    def loadHotkeys(self):
+        try:
+            self.hotkeys.stop()
+        except Exception:
+            pass
+        self.hotkeys = HotKeys(self.getHotkeys())
+        self.hotkeys.start()
+        self.hotkeys.signals.result.connect(self.processGlobalHotkey)
+
+    def getHotkeys(self):
+        hotkeyDict = {}
+        hotkeySettings = QSettings("./utils/cloe-hotkey.ini", QSettings.IniFormat)
+        hotkeys = hotkeySettings.value("hotkeys")
+        if hotkeys:
+            for action, hotkey in hotkeys.items():
+                if hotkey:
+                    hotkeyDict[hotkey] = (self, action)
+        elif not hotkeys:
+            hotkeyDict["<Alt>+Q"] = (self, 'startCapture')
+            hotkeyDict["<Alt>+Z"] = (self, 'loadHotkeys')
+        return hotkeyDict
 
     def loadModel(self):
         def loadModelHelper():
@@ -96,9 +126,10 @@ class SystemTrayApp(QSystemTrayIcon):
         self.externalWindow.showFullScreen()
 
     def openSettings(self):
-        self.settingsMenu = SettingsMenu()
-        self.settingsMenu.show()
-    
+        if not self.settingsMenu:
+            self.settingsMenu = SettingsMenu(self)
+            self.settingsMenu.show()
+
     def openAbout(self):
         AboutPage().exec()
 
