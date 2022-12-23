@@ -1,5 +1,5 @@
 """
-Cloe
+Cloe Helper Functions
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -17,28 +17,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import sys
+from os import path as osPath
 
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QGuiApplication
 
-from SystemTray import SystemTrayApp
-from utils.constants import APP_LOGO, STYLESHEET_DEFAULT
+def logText(text: str, *, saveLog=False, path=".") -> None:
+    """Helper function to log text
 
-if __name__ == '__main__':
+    Args:
+        text (str): Text to log
+        saveLog (bool, optional): Save text to a file if enabled. Defaults to False.
+        path (str, optional): Log file location. Defaults to current path.
+    """
+    clipboard = QGuiApplication.clipboard()
+    clipboard.setText(text)
 
-    app = QApplication(sys.argv)
-    app.setApplicationName("Cloe")
-    app.setWindowIcon(QIcon(APP_LOGO))
-    app.setQuitOnLastWindowClosed(False)
-
-    widget = SystemTrayApp(parent=None)
-
-    styles = STYLESHEET_DEFAULT
-    with open(styles, 'r') as fh:
-        app.setStyleSheet(fh.read())
-    
-    widget.show()
-    widget.loadModel()
-    app.exec_()
-    sys.exit()
+    if saveLog:
+        filename = "log.txt"
+        with open(osPath.join(path, filename), "a", encoding="utf-8") as fh:
+            fh.write(text + "\n")

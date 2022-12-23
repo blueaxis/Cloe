@@ -1,5 +1,5 @@
 """
-Cloe
+Cloe Helper Functions
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -17,28 +17,5 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import sys
-
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication
-
-from SystemTray import SystemTrayApp
-from utils.constants import APP_LOGO, STYLESHEET_DEFAULT
-
-if __name__ == '__main__':
-
-    app = QApplication(sys.argv)
-    app.setApplicationName("Cloe")
-    app.setWindowIcon(QIcon(APP_LOGO))
-    app.setQuitOnLastWindowClosed(False)
-
-    widget = SystemTrayApp(parent=None)
-
-    styles = STYLESHEET_DEFAULT
-    with open(styles, 'r') as fh:
-        app.setStyleSheet(fh.read())
-    
-    widget.show()
-    widget.loadModel()
-    app.exec_()
-    sys.exit()
+from .logText import *
+from .pixmapToText import *

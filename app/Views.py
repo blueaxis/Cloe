@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QGraphicsView, QLabel)
 from Workers import BaseWorker
 from Settings import ViewSettings
 from Preview import CustomBand
-from utils.image_io import logText, pixboxToText
+from utils.scripts import logText, pixmapToText
 
 
 class BaseCanvas(QGraphicsView):
@@ -89,7 +89,7 @@ class BaseCanvas(QGraphicsView):
         self.pixmap = screen.grabWindow(0).scaled(s.width(), s.height())
         pixbox = self.pixmap.copy(self._rubberBand.geometry())
 
-        _worker = BaseWorker(pixboxToText, pixbox, self.parent.ocrModel)
+        _worker = BaseWorker(pixmapToText, pixbox, self.parent.ocrModel)
         _worker.signals.result.connect(self.ocrFinished)
         self._timer.timeout.disconnect(self.rubberBandStopped)
         QThreadPool.globalInstance().start(_worker)

@@ -1,5 +1,5 @@
 """
-Poricom Image Processing Utility
+Cloe Helper Functions
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -18,13 +18,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from io import BytesIO
+from typing import Optional
 
-from PyQt5.QtCore import QBuffer
-from PyQt5.QtGui import QGuiApplication
+from manga_ocr import MangaOcr
 from PIL import Image
+from PyQt5.QtCore import QBuffer
+from PyQt5.QtGui import QPixmap
 
 
-def pixboxToText(pixmap, model=None):
+def pixmapToText(pixmap: QPixmap, model:Optional[MangaOcr]=None) -> str:
+    """
+    Convert QPixmap object to text using the model
+    """
 
     buffer = QBuffer()
     buffer.open(QBuffer.ReadWrite)
@@ -32,7 +37,7 @@ def pixboxToText(pixmap, model=None):
     bytes = BytesIO(buffer.data())
 
     if bytes.getbuffer().nbytes == 0:
-        return
+        return ""
 
     pillowImage = Image.open(bytes)
     text = ""
@@ -41,12 +46,3 @@ def pixboxToText(pixmap, model=None):
         text = model(pillowImage)
 
     return text.strip()
-
-
-def logText(text, mode=False, path="."):
-    clipboard = QGuiApplication.clipboard()
-    clipboard.setText(text)
-
-    if mode:
-        with open(path, 'a', encoding="utf-8") as fh:
-            fh.write(text + "\n")
