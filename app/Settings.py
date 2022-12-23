@@ -349,16 +349,16 @@ class HotkeySettings(SettingsTab):
         # --------------------------------- Settings --------------------------------- #
 
         def saveSettings(self):
-            _shortcut = ""
-            _shortcut += "Shift+" * self.shiftCheckBox.isChecked()
-            _shortcut += "Ctrl+" * self.ctrlCheckBox.isChecked()
-            _shortcut += "Alt+" * self.altCheckBox.isChecked()
-            # _shortcut += "Win+" * self.winCheckBox.isChecked()
+            modifier = ""
+            modifier += "<Shift>+" * self.shiftCheckBox.isChecked()
+            modifier += "<Ctrl>+" * self.ctrlCheckBox.isChecked()
+            modifier += "<Alt>+" * self.altCheckBox.isChecked()
+            # modifier += "<Win>+" * self.winCheckBox.isChecked()
 
-            _key = self.keyComboBox.currentText()
-            if _key == "<Unmapped>":
-                _key = ""
-            _shortcut += _key
+            key = self.keyComboBox.currentText()
+            if key == "<Unmapped>":
+                key = ""
+            modifier += key
 
             for propName, propObject in self._properties.items():
                 try:
@@ -367,26 +367,26 @@ class HotkeySettings(SettingsTab):
                     prop = getattr(self, propObject).currentIndex()
                 self.settings.setValue(propName, int(prop))
 
-            _shortcutText = self.shortcutName.text().split(" ")
-            _shortcutName = _shortcutText[0].lower(
-            ) + "".join(s.title() for s in _shortcutText[1:])
+            shortcutText = self.shortcutName.text().split(" ")
+            shortcutName = shortcutText[0].lower(
+            ) + "".join(s.title() for s in shortcutText[1:])
 
-            return _shortcut, _shortcutName
+            return modifier, shortcutName
 
         def loadSettings(self):
             self.settings = QSettings(
-                "./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
+                "./utils/cloe-hotkey.ini", QSettings.IniFormat)
 
             # Properties and defaults
-            _shortcutText = self.shortcutName.text().split(" ")
-            _shortcutName = _shortcutText[0].lower(
-            ) + "".join(s.title() for s in _shortcutText[1:])
+            shortcutText = self.shortcutName.text().split(" ")
+            shortcutName = shortcutText[0].lower(
+            ) + "".join(s.title() for s in shortcutText[1:])
             self._properties = {
-                f"{_shortcutName}Shift": 'shiftCheckBox',
-                f"{_shortcutName}Ctrl": 'ctrlCheckBox',
-                f"{_shortcutName}Alt": 'altCheckBox',
+                f"{shortcutName}Shift": 'shiftCheckBox',
+                f"{shortcutName}Ctrl": 'ctrlCheckBox',
+                f"{shortcutName}Alt": 'altCheckBox',
                 # f"{_shortcutName}Cmd": 'winCheckBox',
-                f"{_shortcutName}Key": 'keyComboBox'
+                f"{shortcutName}Key": 'keyComboBox'
             }
             self._defaults = {
                 "startCaptureAlt": True,
@@ -422,7 +422,7 @@ class HotkeySettings(SettingsTab):
     def __init__(self, parent):
         super().__init__(parent)
         self.settings = QSettings(
-            "./utils/Manga2OCR-hotkey.ini", QSettings.IniFormat)
+            "./utils/cloe-hotkey.ini", QSettings.IniFormat)
 
         # Layout and margins
         self.setLayout(QGridLayout(self))
@@ -452,10 +452,11 @@ class HotkeySettings(SettingsTab):
             _h[action] = hotkey
         self.settings.setValue('hotkeys', _h)
         _m = MessagePopup("Configuration Saved",
-                          "Restart the application to apply the changes.",
+                          "New shortcuts have been applied.",
                           MessagePopup.Ok)
         # _m.addResetButtons()
         _m.exec()
+        self.parent.onSaveHotkeys()
 
     def loadSettings(self):
         for container in self.containerList:
@@ -463,8 +464,9 @@ class HotkeySettings(SettingsTab):
 
 
 class SettingsMenu(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
         self.setAttribute(Qt.WA_DeleteOnClose)
 
         self.tabs = QTabWidget()
@@ -474,3 +476,6 @@ class SettingsMenu(QWidget):
         self.setLayout(QVBoxLayout(self))
         self.layout().addWidget(self.tabs)
         self.setFixedSize(625, 400)
+
+    def onSaveHotkeys(self):
+        self.parent.loadHotkeys()
