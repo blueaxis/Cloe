@@ -24,6 +24,13 @@ from PyQt5.QtCore import (QRunnable, pyqtSlot)
 from .signals import BaseWorkerSignal
 
 class BaseWorker(QRunnable):
+    """Runnable object to support multithreading
+
+    Args:
+        fn (Callable): Long running task or function
+
+    *Note: args/kwargs passed onto the BaseWorker are passed onto fn
+    """
     def __init__(self, fn: Callable, *args, **kwargs):
         super(BaseWorker, self).__init__()
         self.fn = fn

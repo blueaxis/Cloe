@@ -21,5 +21,8 @@ from .base import BasePopup
 from utils.constants import ABOUT_MESSAGE, APP_NAME
 
 class AboutPopup(BasePopup):
+    """
+    Popup object to display info about app 
+    """
     def __init__(self):
         super().__init__(f"About {APP_NAME}", ABOUT_MESSAGE)

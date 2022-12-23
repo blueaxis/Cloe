@@ -25,7 +25,15 @@ from PyQt5.QtCore import QObject
 from .workers import BaseWorkerSignal
 
 class Hotkeys(GlobalHotKeys):
+    """Listener to support global hotkeys
 
+    Args:
+        hotkeys (dict[str, tuple[QObject, Callable]]): See detailed description below
+
+    hotkeys is a [str, tuple] dictionary with the following scheme:
+        h (str): Hotkey combination
+        tuple[obj (QObject), fn (Callable)]: Object/widget with callable function fn    
+    """
     def __init__(self, hotkeys: dict[str, tuple[QObject, Callable]], *args, **kwargs):
         for h in hotkeys:
             obj, fn = hotkeys[h]
