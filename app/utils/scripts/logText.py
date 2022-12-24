@@ -21,6 +21,7 @@ from os import path as osPath
 
 from PyQt5.QtGui import QGuiApplication
 
+
 def logText(text: str, *, saveLog=False, path=".") -> None:
     """Helper function to log text
 

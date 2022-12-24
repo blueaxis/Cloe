@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from manga_ocr import MangaOcr
-from PyQt5.QtCore import (QObject, QSettings, QThreadPool)
+from PyQt5.QtCore import QObject, QSettings, QThreadPool
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QApplication)
+from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QApplication
 
 from .external import ExternalWindow
 from components.popups import AboutPopup
@@ -47,14 +47,17 @@ class SystemTray(QSystemTrayIcon):
         self.setContextMenu(menu)
 
         # Menu Actions
-        menu.addAction(QIcon("./assets/images/icons/settings.png"),
-            "Settings", self.openSettings)
+        menu.addAction(
+            QIcon("./assets/images/icons/settings.png"), "Settings", self.openSettings
+        )
         menu.addSeparator()
-        menu.addAction(QIcon("./assets/images/icons/about.png"),
-            "About Chloe", self.openAbout)
-        menu.addAction(QIcon("./assets/images/icons/exit.png"),
-            "Exit", self.closeApplication)
-        
+        menu.addAction(
+            QIcon("./assets/images/icons/about.png"), "About Chloe", self.openAbout
+        )
+        menu.addAction(
+            QIcon("./assets/images/icons/exit.png"), "Exit", self.closeApplication
+        )
+
         self.settingsMenu = None
 
     def processGlobalHotkey(self, objectMethod: tuple[QObject, str]):
@@ -79,7 +82,7 @@ class SystemTray(QSystemTrayIcon):
                 if hotkey:
                     hotkeyDict[hotkey] = (self, action)
         elif not hotkeys:
-            hotkeyDict["<Alt>+Q"] = (self, 'startCapture')
+            hotkeyDict["<Alt>+Q"] = (self, "startCapture")
         return hotkeyDict
 
     def loadModel(self):
@@ -98,18 +101,21 @@ class SystemTray(QSystemTrayIcon):
 
             connected = isConnected()
             if connected:
-                self.showMessage("Please wait",
-                                 "Loading the MangaOCR model ...")
+                self.showMessage("Please wait", "Loading the MangaOCR model ...")
                 self.ocrModel = MangaOcr()
             return connected
 
         def modelLoadedConfirmation(connected):
             if connected:
-                self.showMessage("MangaOCR model loaded",
-                    "You are now using the MangaOCR model for Japanese text detection.")
+                self.showMessage(
+                    "MangaOCR model loaded",
+                    "You are now using the MangaOCR model for Japanese text detection.",
+                )
             elif not connected:
-                self.showMessage("Connection Error",
-                    "Please try again or make sure your Internet connection is on.")
+                self.showMessage(
+                    "Connection Error",
+                    "Please try again or make sure your Internet connection is on.",
+                )
 
         worker = BaseWorker(loadModelHelper)
         worker.signals.result.connect(modelLoadedConfirmation)
@@ -120,7 +126,7 @@ class SystemTray(QSystemTrayIcon):
         if self.ocrModel == None:
             self.showMessage(
                 "MangaOCR model not yet loaded",
-                "Please wait until the MangaOCR model is loaded."
+                "Please wait until the MangaOCR model is loaded.",
             )
             return
         self.externalWindow = ExternalWindow(self)

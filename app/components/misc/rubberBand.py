@@ -17,9 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import (Qt)
-from PyQt5.QtGui import (QColor, QPainter, QPaintEvent, QPen)
-from PyQt5.QtWidgets import (QRubberBand, QWidget)
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor, QPainter, QPaintEvent, QPen
+from PyQt5.QtWidgets import QRubberBand, QWidget
 
 
 class RubberBand(QRubberBand):
@@ -33,8 +33,14 @@ class RubberBand(QRubberBand):
         fillColor (QColor, optional): Rubberband fill color. Defaults to QColor(0, 128, 255, 60).
     """
 
-    def __init__(self, parent: QWidget, shape: QRubberBand.Shape=QRubberBand.Rectangle, thickness=2,
-                 borderColor: QColor=Qt.blue, fillColor=QColor(0, 128, 255, 60)):
+    def __init__(
+        self,
+        parent: QWidget,
+        shape: QRubberBand.Shape = QRubberBand.Rectangle,
+        thickness=2,
+        borderColor: QColor = Qt.blue,
+        fillColor=QColor(0, 128, 255, 60),
+    ):
         super().__init__(shape, parent)
         self.setBorder(borderColor, thickness)
         self.setFill(fillColor)

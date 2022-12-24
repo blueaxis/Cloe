@@ -21,4 +21,3 @@ from .camelizeText import camelizeText
 from .colorToRGBA import colorToRGBA
 from .logText import logText
 from .pixmapToText import pixmapToText
-

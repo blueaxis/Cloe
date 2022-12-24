@@ -17,15 +17,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import (Qt)
-from PyQt5.QtWidgets import (QVBoxLayout, QWidget, QTabWidget)
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTabWidget
 
 from .tabs import ViewSettingsTab, HotkeySettingsTab
+
 
 class SettingsMenu(QWidget):
     """
     Container of the settings tabs
     """
+
     def __init__(self, parent):
         super().__init__()
         # Manually set parent since QSystemTrayIcon is not a QWidget

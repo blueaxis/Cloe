@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from os import remove
 
-from PyQt5.QtCore import (Qt, QSettings)
-from PyQt5.QtWidgets import (QHBoxLayout, QPushButton, QWidget)
+from PyQt5.QtCore import Qt, QSettings
+from PyQt5.QtWidgets import QHBoxLayout, QPushButton, QWidget
 
 # TODO: Settings UI and settings core should be different classes
 class BaseSettingsTab(QWidget):
@@ -29,11 +29,12 @@ class BaseSettingsTab(QWidget):
     Args:
         parent (QWidget): Parent widget. Set to SettingsMenu object.
     """
+
     def __init__(self, parent: QWidget):
         super().__init__(parent)
         self.settings: QSettings = None
 
-# -------------------------------- UI Initializations -------------------------------- #
+    # -------------------------------- UI Initializations -------------------------------- #
 
     def addButtonBar(self, row: int):
         """
@@ -58,7 +59,7 @@ class BaseSettingsTab(QWidget):
 
         self.layout().addWidget(buttonBar, row, 0, 1, -1, alignment=Qt.AlignBottom)
 
-# ------------------------------------- Settings ------------------------------------- #
+    # ------------------------------------- Settings ------------------------------------- #
 
     def saveSettings(self):
         pass

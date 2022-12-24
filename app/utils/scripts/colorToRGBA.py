@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtGui import QColor
 
+
 def colorToRGBA(c: QColor) -> str:
     """
     Converts QColor to a QSS string of the following format:

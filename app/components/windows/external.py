@@ -19,20 +19,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import TYPE_CHECKING
 
-from PyQt5.QtCore import (Qt)
-from PyQt5.QtGui import (QCloseEvent, QCursor)
-from PyQt5.QtWidgets import (QApplication, QMainWindow)
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QCloseEvent, QCursor
+from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from components.views import FullScreenView
 
 if TYPE_CHECKING:
     from .tray import SystemTray
 
+
 class ExternalWindow(QMainWindow):
     """
     External window widget to enclose FullScreenView
     """
-    def __init__(self, parent: 'SystemTray'):
+
+    def __init__(self, parent: "SystemTray"):
         super().__init__()
 
         # Layout and styles

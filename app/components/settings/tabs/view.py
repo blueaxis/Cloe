@@ -17,9 +17,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import (Qt)
-from PyQt5.QtWidgets import (QGridLayout, QLabel, QPushButton, QWidget,
-                             QInputDialog, QColorDialog, QFontDialog)
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QGridLayout,
+    QLabel,
+    QPushButton,
+    QWidget,
+    QInputDialog,
+    QColorDialog,
+    QFontDialog,
+)
 
 from .base import BaseSettingsTab
 from components.views import Preview, ViewContainer
@@ -29,17 +36,18 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
     """
     Settings tab for view-related settings
     """
+
     def __init__(self, parent: QWidget):
 
         super().__init__(parent)
 
-        self.setLayout(QGridLayout(self))        
+        self.setLayout(QGridLayout(self))
         self.initButtons()
         self.initPreview()
         self.updateViewStyles()
         self.addButtonBar(self.layout().rowCount())
 
-# ------------------------------------- Settings ------------------------------------- #
+    # ------------------------------------- Settings ------------------------------------- #
 
     def saveSettings(self):
         for propName, _ in self._defaults.items():
@@ -52,7 +60,7 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
         super().restoreDefaultSettings()
         self.updateViewStyles()
 
-# -------------------------------- UI Initializations -------------------------------- #
+    # -------------------------------- UI Initializations -------------------------------- #
 
     def initButtons(self):
         """
@@ -76,11 +84,10 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
         self.layout().addWidget(_previewPadding, 0, 7, 1, 2)
 
         # Signals and Slots
-        _previewColor.clicked.connect(lambda: self.getColor('previewColor'))
-        _previewBackground.clicked.connect(
-            lambda: self.getColor('previewBackground'))
-        _previewFont.clicked.connect(lambda: self.getFont('previewFont'))
-        _previewPadding.clicked.connect(lambda: self.getInt('previewPadding'))
+        _previewColor.clicked.connect(lambda: self.getColor("previewColor"))
+        _previewBackground.clicked.connect(lambda: self.getColor("previewBackground"))
+        _previewFont.clicked.connect(lambda: self.getFont("previewFont"))
+        _previewPadding.clicked.connect(lambda: self.getInt("previewPadding"))
 
         # --------------------------- Selection Rubberband --------------------------- #
 
@@ -100,19 +107,22 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
 
         # Signals and Slots
         _selectionBorderColor.clicked.connect(
-            lambda: self.getColor('selectionBorderColor'))
+            lambda: self.getColor("selectionBorderColor")
+        )
         _selectionBackground.clicked.connect(
-            lambda: self.getColor('selectionBackground'))
+            lambda: self.getColor("selectionBackground")
+        )
         _selectionBorderThickness.clicked.connect(
-            lambda: self.getInt('selectionBorderThickness'))
-        _windowColor.clicked.connect(lambda: self.getColor('windowColor'))
+            lambda: self.getInt("selectionBorderThickness")
+        )
+        _windowColor.clicked.connect(lambda: self.getColor("windowColor"))
 
     def initPreview(self):
         self._preview = Preview(self)
         self.layout().addWidget(self._preview, 2, 0, 1, -1)
-        self.layout().setRowStretch(self.layout().rowCount()-1, 1)
+        self.layout().setRowStretch(self.layout().rowCount() - 1, 1)
 
-# --------------------------- Property Setters and Getters --------------------------- #
+    # --------------------------- Property Setters and Getters --------------------------- #
 
     def setProperty(self, objectName: str, value):
         """Set the value of a member of this class with name objectName
@@ -129,8 +139,9 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
             initialColor = getattr(self, objectName)
         except:
             initialColor = self._defaults[objectName]
-        color = QColorDialog().getColor(initial=initialColor,
-                                        options=QColorDialog.ShowAlphaChannel)
+        color = QColorDialog().getColor(
+            initial=initialColor, options=QColorDialog.ShowAlphaChannel
+        )
         if color.isValid():
             self.setProperty(objectName, color)
 
@@ -155,7 +166,8 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
             value=initialInt,
             min=1,
             max=50,
-            flags=Qt.CustomizeWindowHint | Qt.WindowTitleHint)
+            flags=Qt.CustomizeWindowHint | Qt.WindowTitleHint,
+        )
 
         if accepted:
             self.setProperty(objectName, i)

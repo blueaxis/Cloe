@@ -22,6 +22,7 @@ from PyQt5.QtCore import QObject
 
 from .workers import BaseWorkerSignal
 
+
 class Hotkeys(GlobalHotKeys):
     """Listener to support global hotkeys
 
@@ -30,8 +31,9 @@ class Hotkeys(GlobalHotKeys):
 
     hotkeys is a [str, tuple] dictionary with the following scheme:
         h (str): Hotkey combination
-        tuple[obj (QObject), fn (str)]: Object/widget with function named fn    
+        tuple[obj (QObject), fn (str)]: Object/widget with function named fn
     """
+
     def __init__(self, hotkeys: dict[str, tuple[QObject, str]], *args, **kwargs):
         for h in hotkeys:
             obj, fn = hotkeys[h]

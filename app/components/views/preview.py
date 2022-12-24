@@ -17,9 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import (Qt)
-from PyQt5.QtGui import (QColor, QPainter, QPaintEvent, QPen, QResizeEvent)
-from PyQt5.QtWidgets import (QLabel, QGridLayout, QWidget)
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor, QPainter, QPaintEvent, QPen, QResizeEvent
+from PyQt5.QtWidgets import QLabel, QGridLayout, QWidget
 
 from components.misc import RubberBand
 
@@ -40,7 +40,7 @@ class Preview(QWidget):
     def setBackgroundColor(self, color: QColor):
         self.backgroundColor = color
 
-# -------------------------------- UI Initializations -------------------------------- #
+    # -------------------------------- UI Initializations -------------------------------- #
 
     def createSelectionBand(self):
         self.rubberBand = RubberBand(self)
@@ -50,8 +50,9 @@ class Preview(QWidget):
         self._previewText = QLabel(text)
         self._previewText.setObjectName("previewText")
         self._previewText.adjustSize()
-        self.layout().addWidget(self._previewText, 0, 0,
-                                alignment=Qt.AlignTop | Qt.AlignLeft)
+        self.layout().addWidget(
+            self._previewText, 0, 0, alignment=Qt.AlignTop | Qt.AlignLeft
+        )
 
     def createAlphaBackground(self):
         painter = QPainter()
@@ -63,13 +64,14 @@ class Preview(QWidget):
         numSquaresX = int(self.width() / squareSize) + 1
         numSquaresY = int(self.height() / squareSize) + 1
         for y in range(numSquaresY):
-            isWhite = ((y % 2) == 0)
+            isWhite = (y % 2) == 0
             for x in range(numSquaresX):
                 color = QColor(200, 200, 200, 255)
-                if(isWhite):
+                if isWhite:
                     color.setRgb(255, 255, 255, 255)
-                painter.fillRect(x * squareSize, y * squareSize,
-                                 squareSize, squareSize, color)
+                painter.fillRect(
+                    x * squareSize, y * squareSize, squareSize, squareSize, color
+                )
                 isWhite = not isWhite
         # Draw true background
         painter.fillRect(0, 0, self.width(), self.height(), self.backgroundColor)
@@ -81,7 +83,7 @@ class Preview(QWidget):
         self.createAlphaBackground()
         return super().paintEvent(event)
 
-# ----------------------------------- View Updates ----------------------------------- #
+    # ----------------------------------- View Updates ----------------------------------- #
 
     def resizeEvent(self, event: QResizeEvent):
         if self is not None:
@@ -89,6 +91,6 @@ class Preview(QWidget):
             w = 0.4 * self.width()
             y = 0.05 * self.height()
             x = self.width() - w - y
-            h = self.height() - 2*y
+            h = self.height() - 2 * y
             self.rubberBand.setGeometry(x, y, w, h)
         return super().resizeEvent(event)

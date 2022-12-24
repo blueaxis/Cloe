@@ -17,17 +17,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import (Qt, QSettings)
-from PyQt5.QtWidgets import (QGridLayout, QWidget)
+from PyQt5.QtCore import Qt, QSettings
+from PyQt5.QtWidgets import QGridLayout, QWidget
 
 from ..base import BaseSettingsTab
 from .container import HotkeyContainer
 from components.popups import BasePopup
 
+
 class HotkeySettingsTab(BaseSettingsTab):
     """
     Settings tab for hotkey-related settings
     """
+
     def __init__(self, parent: QWidget):
         super().__init__(parent)
         # TODO: SettingsMenu is not being set as parent
@@ -40,10 +42,10 @@ class HotkeySettingsTab(BaseSettingsTab):
 
         self.initializeHotkeyContainers()
         self.layout().addWidget(QWidget())
-        self.layout().setRowStretch(self.layout().rowCount()-1, 1)
+        self.layout().setRowStretch(self.layout().rowCount() - 1, 1)
         self.addButtonBar(self.layout().rowCount())
 
-# -------------------------------- UI Initializations -------------------------------- #
+    # -------------------------------- UI Initializations -------------------------------- #
 
     def initializeHotkeyContainers(self):
         """Initialize HotkeyContainer widgets for the given actions
@@ -58,7 +60,7 @@ class HotkeySettingsTab(BaseSettingsTab):
             self.containers.append(HotkeyContainer(action))
             self.layout().addWidget(self.containers[-1])
 
-# ------------------------------------- Settings ------------------------------------- #
+    # ------------------------------------- Settings ------------------------------------- #
 
     def saveSettings(self):
         hotkeys = {}
@@ -66,7 +68,7 @@ class HotkeySettingsTab(BaseSettingsTab):
             hotkey, action = container.saveSettings()
             hotkeys[action] = hotkey
         # TODO: Save config in HotkeyContainer instead
-        self.settings.setValue('hotkeys', hotkeys)
+        self.settings.setValue("hotkeys", hotkeys)
         message = BasePopup("Configuration Saved", "New shortcuts have been applied.")
         message.exec()
         self.menu.onSaveHotkeys()

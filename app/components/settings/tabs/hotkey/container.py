@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Union
 
-from PyQt5.QtCore import (Qt, QSettings)
-from PyQt5.QtWidgets import (QHBoxLayout, QWidget, QLabel, QComboBox, QCheckBox)
+from PyQt5.QtCore import Qt, QSettings
+from PyQt5.QtWidgets import QHBoxLayout, QWidget, QLabel, QComboBox, QCheckBox
 
 from utils.constants import HOTKEYS_DEFAULT, UNMAPPED_KEY, VALID_KEY_LIST
 from utils.scripts import camelizeText
+
 
 class HotkeyContainer(QWidget):
     """Generic container for hotkey settings component
@@ -32,6 +33,7 @@ class HotkeyContainer(QWidget):
         shortcutName (str): Name of the shortcut.
         Based on the name of the callable in the system tray application.
     """
+
     def __init__(self, shortcutName: str):
         super().__init__()
 
@@ -46,7 +48,7 @@ class HotkeyContainer(QWidget):
         self.initWidgets(shortcutName)
         self.loadSettings()
 
-# -------------------------------- UI Initializations -------------------------------- #
+    # -------------------------------- UI Initializations -------------------------------- #
 
     def initWidgets(self, shortcutName: str):
         """
@@ -77,7 +79,7 @@ class HotkeyContainer(QWidget):
             self.layout().addWidget(modifier, alignment=Qt.AlignRight)
         self.layout().addWidget(self.mainKey, alignment=Qt.AlignRight)
 
-# ------------------------------------- Settings ------------------------------------- #
+    # ------------------------------------- Settings ------------------------------------- #
 
     def saveSettings(self):
         """
@@ -118,7 +120,7 @@ class HotkeyContainer(QWidget):
         for propName, propDefault in shortcut.items():
             self.setWidgetState(propName, propDefault)
 
-# -------------------------------- Helpers Functions -------------------------------- #
+    # -------------------------------- Helpers Functions -------------------------------- #
 
     def getContainerState(self):
         state = {}

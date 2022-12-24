@@ -26,7 +26,7 @@ from PyQt5.QtCore import QBuffer
 from PyQt5.QtGui import QPixmap
 
 
-def pixmapToText(pixmap: QPixmap, model:Optional[MangaOcr]=None) -> str:
+def pixmapToText(pixmap: QPixmap, model: Optional[MangaOcr] = None) -> str:
     """
     Convert QPixmap object to text using the model
     """

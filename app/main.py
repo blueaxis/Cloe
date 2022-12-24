@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import QApplication
 from components.windows import SystemTray
 from utils.constants import APP_LOGO, APP_NAME, STYLESHEET_DEFAULT
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     app.setApplicationName(APP_NAME)
@@ -35,9 +35,9 @@ if __name__ == '__main__':
     widget = SystemTray()
 
     styles = STYLESHEET_DEFAULT
-    with open(styles, 'r') as fh:
+    with open(styles, "r") as fh:
         app.setStyleSheet(fh.read())
-    
+
     widget.show()
     widget.loadModel()
     app.exec_()

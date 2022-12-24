@@ -17,10 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import (Qt, QThreadPool, QTimer,
-                          QPoint, QRect, QSize, pyqtSlot)
-from PyQt5.QtGui import (QPixmap)
-from PyQt5.QtWidgets import (QApplication, QGraphicsView, QLabel, QWidget)
+from PyQt5.QtCore import Qt, QThreadPool, QTimer, QPoint, QRect, QSize, pyqtSlot
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QLabel, QWidget
 
 from components.misc import RubberBand
 from components.services import BaseWorker
@@ -50,7 +49,7 @@ class BaseOCRView(QGraphicsView):
 
         self.pixmap = QPixmap()
 
-# -------------------------------------- Mouse -------------------------------------- #
+    # -------------------------------------- Mouse -------------------------------------- #
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -60,16 +59,18 @@ class BaseOCRView(QGraphicsView):
         return super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        if (event.buttons() & Qt.LeftButton):
+        if event.buttons() & Qt.LeftButton:
             self._timer.start()
             self.rubberBand.setGeometry(
-                QRect(self._initialPoint, event.pos()).normalized())
+                QRect(self._initialPoint, event.pos()).normalized()
+            )
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.rubberBand.setGeometry(
-                QRect(self._initialPoint, event.pos()).normalized())
+                QRect(self._initialPoint, event.pos()).normalized()
+            )
 
             text = self._ocrText.text()
             logText(text)
@@ -96,7 +97,7 @@ class BaseOCRView(QGraphicsView):
         self._timer.timeout.disconnect(self.rubberBandStopped)
         QThreadPool.globalInstance().start(worker)
 
-# -------------------------------------- Close -------------------------------------- #
+    # -------------------------------------- Close -------------------------------------- #
 
     def closeEvent(self, event):
         # Ensure that object is deleted before closing

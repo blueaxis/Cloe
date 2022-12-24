@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import (QObject, pyqtSignal)
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
 class BaseWorkerSignal(QObject):
@@ -26,5 +26,6 @@ class BaseWorkerSignal(QObject):
         finished: Emit when thread finished the task
         result: Emit the result of the task
     """
+
     finished = pyqtSignal()
     result = pyqtSignal(object)

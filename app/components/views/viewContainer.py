@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Optional
 
-from PyQt5.QtCore import (QSettings)
-from PyQt5.QtGui import (QColor, QFont)
-from PyQt5.QtWidgets import (QWidget)
+from PyQt5.QtCore import QSettings
+from PyQt5.QtGui import QColor, QFont
+from PyQt5.QtWidgets import QWidget
 
 from utils.constants import VIEW_SETTINGS_DEFAULT
 from utils.scripts import colorToRGBA
@@ -31,12 +31,13 @@ class ViewContainer(QWidget):
     """
     Generic view container
     """
+
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
         self.loadSettings()
 
-# ------------------------------------- Settings ------------------------------------- #
+    # ------------------------------------- Settings ------------------------------------- #
 
     def loadSettings(self, file="./utils/cloe-view.ini"):
         """Load the settings from the configuration file
@@ -54,9 +55,11 @@ class ViewContainer(QWidget):
                 prop = int(prop)
             setattr(self, propName, prop)
 
-# ----------------------------------- View Updates ----------------------------------- #
+    # ----------------------------------- View Updates ----------------------------------- #
 
-    def getPreviewTextStyles(self, font: QFont, padding:int, color: QColor, background: QColor):
+    def getPreviewTextStyles(
+        self, font: QFont, padding: int, color: QColor, background: QColor
+    ):
         """Converts parameters to QSS styles for the previewText
 
         Args:
@@ -85,8 +88,12 @@ class ViewContainer(QWidget):
             view (QWidget, optional): The view to be updated. Defaults to None.
         """
         # Update preview text style
-        styles = self.getPreviewTextStyles(self.previewFont, self.previewPadding,
-            colorToRGBA(self.previewColor), colorToRGBA(self.previewBackground))
+        styles = self.getPreviewTextStyles(
+            self.previewFont,
+            self.previewPadding,
+            colorToRGBA(self.previewColor),
+            colorToRGBA(self.previewBackground),
+        )
 
         if not view:
             try:
@@ -96,5 +103,7 @@ class ViewContainer(QWidget):
 
         view.parentWidget().setStyleSheet(styles)
         view.rubberBand.setFill(self.selectionBackground)
-        view.rubberBand.setBorder(self.selectionBorderColor, self.selectionBorderThickness)
+        view.rubberBand.setBorder(
+            self.selectionBorderColor, self.selectionBorderThickness
+        )
         view.setBackgroundColor(self.windowColor)
