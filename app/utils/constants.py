@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from PyQt5.QtGui import QColor, QFont
+
 # General
 APP_NAME = "Cloe"
 
@@ -25,6 +27,20 @@ APP_LOGO = "./assets/images/icons/logo.ico"
 STYLESHEET_LIGHT = "./assets/styles.qss"
 STYLESHEET_DARK = "./assets/styles-dark.qss"
 STYLESHEET_DEFAULT = "./assets/styles.qss"
+
+# Settings
+VIEW_SETTINGS_DEFAULT = {
+    # Preview
+    'previewFont': QFont("Arial", 16),
+    'previewColor': QColor(239, 240, 241, 255),
+    'previewBackground': QColor(72, 75, 106, 230),
+    'previewPadding': 10,
+    # Selection rubberband
+    'selectionBorderColor': QColor(0, 128, 255, 255),
+    'selectionBorderThickness': 2,
+    'selectionBackground': QColor(0, 128, 255, 60),
+    'windowColor': QColor(255, 255, 255, 13)
+}
 
 # Popups
 ABOUT_MESSAGE = ("Inspired by <a href='http://capture2text.sourceforge.net/'>"

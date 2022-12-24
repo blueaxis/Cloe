@@ -1,5 +1,5 @@
 """
-Cloe Helper Functions
+Cloe View Components
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -17,7 +17,5 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from .colorToRGBA import colorToRGBA
-from .logText import logText
-from .pixmapToText import pixmapToText
-
+from .preview import Preview
+from .viewContainer import ViewContainer

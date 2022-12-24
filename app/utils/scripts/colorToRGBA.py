@@ -17,7 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from .colorToRGBA import colorToRGBA
-from .logText import logText
-from .pixmapToText import pixmapToText
+from PyQt5.QtGui import QColor
 
+def colorToRGBA(c: QColor) -> str:
+    """
+    Converts QColor to a QSS string of the following format:
+    "rgba(<red>, <green>, <blue>, <alpha>)"
+    """
+    return f"rgba({c.red()}, {c.green()}, {c.blue()}, {c.alpha()})"
