@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from .camelizeText import camelizeText
 from .colorToRGBA import colorToRGBA
 from .logText import logText
 from .pixmapToText import pixmapToText

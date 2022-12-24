@@ -29,6 +29,20 @@ STYLESHEET_DARK = "./assets/styles-dark.qss"
 STYLESHEET_DEFAULT = "./assets/styles.qss"
 
 # Settings
+## Defaults
+HOTKEYS_DEFAULT = {
+    "startCapture": {
+        "altKey": True,
+        "mainKey": 17
+    },
+    "unmapped": {
+        "shiftKey": False,
+        "ctrlKey": False,
+        "altKey": False,
+        # "winKey": False,
+        "mainKey": 0
+    }
+}
 VIEW_SETTINGS_DEFAULT = {
     # Preview
     'previewFont': QFont("Arial", 16),
@@ -41,6 +55,11 @@ VIEW_SETTINGS_DEFAULT = {
     'selectionBackground': QColor(0, 128, 255, 60),
     'windowColor': QColor(255, 255, 255, 13)
 }
+## Constants
+UNMAPPED_KEY = "<Unmapped>"
+VALID_KEY_LIST = [UNMAPPED_KEY, "A", "B", "C", "D", "E", "F", "G",
+                 "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q",
+                 "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
 # Popups
 ABOUT_MESSAGE = ("Inspired by <a href='http://capture2text.sourceforge.net/'>"

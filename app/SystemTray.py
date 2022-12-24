@@ -22,11 +22,9 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import (QSettings, QThreadPool)
 from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QApplication)
 
+from components import AboutPopup, SettingsMenu
 from components.services import BaseWorker, Hotkeys
 from Views import ExternalWindow
-from Settings import SettingsMenu
-from components import AboutPopup
-
 
 class SystemTrayApp(QSystemTrayIcon):
 

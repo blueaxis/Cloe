@@ -22,16 +22,15 @@ from PyQt5.QtCore import (Qt, QThreadPool, QTimer,
                           QPoint, QRect, QSize, pyqtSlot)
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QGraphicsView, QLabel)
 
+from components import RubberBand, ViewContainer
 from components.services import BaseWorker
-from Settings import ViewSettings
-from Preview import CustomBand
-from utils.scripts import logText, pixmapToText
+from utils.scripts import colorToRGBA, logText, pixmapToText
 
 
 class BaseCanvas(QGraphicsView):
 
-    def __init__(self, parent=None):
-        QGraphicsView.__init__(self, parent)
+    def __init__(self, parent):
+        super().__init__(parent)
         self.parent = parent
 
         self._timer = QTimer()
@@ -40,7 +39,7 @@ class BaseCanvas(QGraphicsView):
         self._timer.timeout.connect(self.rubberBandStopped)
 
         self._initialPoint = QPoint()
-        self._rubberBand = CustomBand(CustomBand.Rectangle, self.parent)
+        self.rubberBand = RubberBand(self.parent)
 
         self._canvasText = QLabel("", self.parent, Qt.WindowStaysOnTopHint)
         self._canvasText.setWordWrap(True)
@@ -52,26 +51,26 @@ class BaseCanvas(QGraphicsView):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self._initialPoint = event.pos()
-            self._rubberBand.setGeometry(QRect(self._initialPoint, QSize()))
-            self._rubberBand.show()
+            self.rubberBand.setGeometry(QRect(self._initialPoint, QSize()))
+            self.rubberBand.show()
         return super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
         if ((event.buttons() & Qt.LeftButton)):
             self._timer.start()
-            self._rubberBand.setGeometry(
+            self.rubberBand.setGeometry(
                 QRect(self._initialPoint, event.pos()).normalized())
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
         if (event.button() == Qt.LeftButton):
-            self._rubberBand.setGeometry(
+            self.rubberBand.setGeometry(
                 QRect(self._initialPoint, event.pos()).normalized())
 
             # TODO: Track log path and log mode in QSettings instead
             text = self._canvasText.text()
             logText(text)
-            self._rubberBand.hide()
+            self.rubberBand.hide()
             self._canvasText.hide()
 
         super().mouseReleaseEvent(event)
@@ -87,7 +86,7 @@ class BaseCanvas(QGraphicsView):
         screen = QApplication.primaryScreen()
         s = screen.size()
         self.pixmap = screen.grabWindow(0).scaled(s.width(), s.height())
-        pixbox = self.pixmap.copy(self._rubberBand.geometry())
+        pixbox = self.pixmap.copy(self.rubberBand.geometry())
 
         _worker = BaseWorker(pixmapToText, pixbox, self.parent.ocrModel)
         _worker.signals.result.connect(self.ocrFinished)
@@ -108,22 +107,21 @@ class BaseCanvas(QGraphicsView):
             print(e)
 
 
-class FullScreen(BaseCanvas, ViewSettings):
+class FullScreen(BaseCanvas, ViewContainer):
 
     def __init__(self, parent=None):
-        BaseCanvas.__init__(self, parent)
+        super().__init__(parent)
 
         # View Initializations
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # Restore settings and update view
-        self._liveView = None
-        self.loadSettings()
-        self.updateLiveView(inSettings=False)
+        # self.loadSettings()
+        self.updateViewStyles(self)
 
     def setBackgroundColor(self, color):
-        self.setStyleSheet(f"background-color: {color}")
+        self.setStyleSheet(f"background-color: {colorToRGBA(color)}")
 
     def mouseReleaseEvent(self, event):
         BaseCanvas.mouseReleaseEvent(self, event)

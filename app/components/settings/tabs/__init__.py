@@ -1,5 +1,5 @@
 """
-Cloe Components
+Cloe Settings Tab Components
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -17,7 +17,5 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from .popups import AboutPopup, BasePopup
-from .rubberBand import RubberBand
-from .settings import SettingsMenu
-from .views import Preview, ViewContainer
+from .hotkey import HotkeySettingsTab
+from .view import ViewSettingsTab
