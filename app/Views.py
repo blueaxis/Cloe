@@ -22,8 +22,9 @@ from PyQt5.QtCore import (Qt, QThreadPool, QTimer,
                           QPoint, QRect, QSize, pyqtSlot)
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QGraphicsView, QLabel)
 
-from components import RubberBand, ViewContainer
+from components.misc import RubberBand
 from components.services import BaseWorker
+from components.views import ViewContainer
 from utils.scripts import colorToRGBA, logText, pixmapToText
 
 

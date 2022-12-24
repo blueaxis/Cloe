@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import (QGridLayout, QWidget)
 
 from ..base import BaseSettingsTab
 from .container import HotkeyContainer
-from components import BasePopup
+from components.popups import BasePopup
 
 class HotkeySettingsTab(BaseSettingsTab):
     """
