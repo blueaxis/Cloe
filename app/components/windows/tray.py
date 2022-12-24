@@ -1,5 +1,5 @@
 """
-Cloe Main Application
+Cloe Window Components
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -18,24 +18,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from manga_ocr import MangaOcr
+from PyQt5.QtCore import (QObject, QSettings, QThreadPool)
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import (QSettings, QThreadPool)
 from PyQt5.QtWidgets import (QSystemTrayIcon, QMenu, QApplication)
 
+from .external import ExternalWindow
 from components.popups import AboutPopup
 from components.services import BaseWorker, Hotkeys
 from components.settings import SettingsMenu
-from Views import ExternalWindow
 
-class SystemTrayApp(QSystemTrayIcon):
+
+class SystemTray(QSystemTrayIcon):
+    """
+    System tray application containing all global actions
+    """
 
     def __init__(self, parent=None):
         icon = QIcon("./assets/images/icons/logo.ico")
-        QSystemTrayIcon.__init__(self, icon, parent)
+        super().__init__(icon, parent)
 
         # State trackers and configurations
         self.threadpool = QThreadPool()
-        self.ocrModel = None
+        self.ocrModel: MangaOcr = None
         self.loadHotkeys()
 
         # Menu
@@ -53,7 +57,7 @@ class SystemTrayApp(QSystemTrayIcon):
         
         self.settingsMenu = None
 
-    def processGlobalHotkey(self, objectMethod):
+    def processGlobalHotkey(self, objectMethod: tuple[QObject, str]):
         obj, fn = objectMethod
         getattr(obj, fn)()
 

@@ -17,8 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from typing import Callable
-
 from pynput.keyboard import GlobalHotKeys
 from PyQt5.QtCore import QObject
 
@@ -32,14 +30,14 @@ class Hotkeys(GlobalHotKeys):
 
     hotkeys is a [str, tuple] dictionary with the following scheme:
         h (str): Hotkey combination
-        tuple[obj (QObject), fn (Callable)]: Object/widget with callable function fn    
+        tuple[obj (QObject), fn (str)]: Object/widget with function named fn    
     """
-    def __init__(self, hotkeys: dict[str, tuple[QObject, Callable]], *args, **kwargs):
+    def __init__(self, hotkeys: dict[str, tuple[QObject, str]], *args, **kwargs):
         for h in hotkeys:
             obj, fn = hotkeys[h]
             hotkeys[h] = lambda obj=obj, fn=fn: self.onPress(obj, fn)
         super().__init__(hotkeys, *args, **kwargs)
         self.signals = BaseWorkerSignal()
 
-    def onPress(self, obj: QObject, fn: Callable):
+    def onPress(self, obj: QObject, fn: str):
         self.signals.result.emit((obj, fn))
