@@ -31,12 +31,18 @@ STYLESHEET_DEFAULT = "./assets/styles.qss"
 # Settings
 ## Defaults
 HOTKEYS_DEFAULT = {
-    "startCapture": {"altKey": True, "mainKey": 17},
+    "startCapture": {
+        "shiftKey": "false",
+        "ctrlKey": "false",
+        "altKey": "true",
+        # "winKey": "false",
+        "mainKey": 17,
+    },
     "unmapped": {
-        "shiftKey": False,
-        "ctrlKey": False,
-        "altKey": False,
-        # "winKey": False,
+        "shiftKey": "false",
+        "ctrlKey": "false",
+        "altKey": "false",
+        # "winKey": "false",
         "mainKey": 0,
     },
 }
