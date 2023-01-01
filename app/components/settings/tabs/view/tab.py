@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from typing import Any
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QGridLayout,
@@ -28,8 +30,9 @@ from PyQt5.QtWidgets import (
     QFontDialog,
 )
 
-from .base import BaseSettingsTab
-from components.views import Preview, ViewContainer
+from ..tab import BaseSettingsTab
+from .container import ViewContainer
+from .preview import Preview
 
 
 class ViewSettingsTab(ViewContainer, BaseSettingsTab):
@@ -39,26 +42,13 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
 
     def __init__(self, parent: QWidget):
 
-        super().__init__(parent)
+        super().__init__(parent, "./utils/cloe-view.ini")
 
         self.setLayout(QGridLayout(self))
         self.initButtons()
         self.initPreview()
         self.updateViewStyles()
         self.addButtonBar(self.layout().rowCount())
-
-    # ------------------------------------- Settings ------------------------------------- #
-
-    def saveSettings(self):
-        for propName, _ in self._defaults.items():
-            # TODO: Add custom getAttribute method
-            # This is to handle props that can't be directly accessed
-            # Example: self.checkbox.isChecked()
-            self.settings.setValue(propName, getattr(self, propName))
-
-    def restoreDefaultSettings(self):
-        super().restoreDefaultSettings()
-        self.updateViewStyles()
 
     # -------------------------------- UI Initializations -------------------------------- #
 
@@ -122,19 +112,20 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
         self.layout().addWidget(self._preview, 2, 0, 1, -1)
         self.layout().setRowStretch(self.layout().rowCount() - 1, 1)
 
+    # ------------------------------------- Settings ------------------------------------- #
+
+    def resetSettings(self):
+        super().resetSettings()
+        self.updateViewStyles()
+
     # --------------------------- Property Setters and Getters --------------------------- #
 
-    def setProperty(self, objectName: str, value):
-        """Set the value of a member of this class with name objectName
-
-        Args:
-            objectName (str): Name of the property
-            value (Any): Value to set
-        """
-        setattr(self, objectName, value)
+    def setProperty_(self, prop: str, value: Any):
+        super().setProperty(prop, value)
         self.updateViewStyles()
 
     def getColor(self, objectName: str):
+        # TODO: getattr calls might be redundant
         try:
             initialColor = getattr(self, objectName)
         except:
@@ -143,7 +134,7 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
             initial=initialColor, options=QColorDialog.ShowAlphaChannel
         )
         if color.isValid():
-            self.setProperty(objectName, color)
+            self.setProperty_(objectName, color)
 
     def getFont(self, objectName: str):
         try:
@@ -152,7 +143,7 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
             initialFont = self._defaults[objectName]
         font, accepted = QFontDialog().getFont(initialFont)
         if accepted:
-            self.setProperty(objectName, font)
+            self.setProperty_(objectName, font)
 
     def getInt(self, objectName: str):
         try:
@@ -170,4 +161,4 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
         )
 
         if accepted:
-            self.setProperty(objectName, i)
+            self.setProperty_(objectName, i)

@@ -1,5 +1,5 @@
 """
-Cloe View Components
+Cloe Settings Tab Components
 
 Copyright (C) `2021-2022` `<Alarcon Ace Belen>`
 
@@ -17,4 +17,5 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from .ocr import FullScreenView
+from .container import ViewContainer
+from .tab import ViewSettingsTab

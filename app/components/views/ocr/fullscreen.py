@@ -21,7 +21,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QMouseEvent
 from PyQt5.QtWidgets import QWidget
 
-from ..viewContainer import ViewContainer
+from components.settings import ViewContainer
 from .base import BaseOCRView
 from utils.scripts import colorToRGBA
 

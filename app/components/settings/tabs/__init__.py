@@ -18,4 +18,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from .hotkey import HotkeySettingsTab
-from .view import ViewSettingsTab
+from .view import ViewSettingsTab, ViewContainer
