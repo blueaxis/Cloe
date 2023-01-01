@@ -115,50 +115,40 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
     # ------------------------------------- Settings ------------------------------------- #
 
     def resetSettings(self):
+        # Overridden to update styles on reset
         super().resetSettings()
         self.updateViewStyles()
 
     # --------------------------- Property Setters and Getters --------------------------- #
 
-    def setProperty_(self, prop: str, value: Any):
+    def setPropertyAndUpdate(self, prop: str, value: Any):
         super().setProperty(prop, value)
         self.updateViewStyles()
 
-    def getColor(self, objectName: str):
-        # TODO: getattr calls might be redundant
-        try:
-            initialColor = getattr(self, objectName)
-        except:
-            initialColor = self._defaults[objectName]
-        color = QColorDialog().getColor(
-            initial=initialColor, options=QColorDialog.ShowAlphaChannel
+    def getColor(self, prop: str):
+        initial = self.getProperty(prop)
+        color = QColorDialog(self).getColor(
+            initial=initial, options=QColorDialog.ShowAlphaChannel
         )
         if color.isValid():
-            self.setProperty_(objectName, color)
+            self.setPropertyAndUpdate(prop, color)
 
-    def getFont(self, objectName: str):
-        try:
-            initialFont = getattr(self, objectName)
-        except:
-            initialFont = self._defaults[objectName]
-        font, accepted = QFontDialog().getFont(initialFont)
+    def getFont(self, prop: str):
+        initial = self.getProperty(prop)
+        font, accepted = QFontDialog(self).getFont(initial)
         if accepted:
-            self.setProperty_(objectName, font)
+            self.setPropertyAndUpdate(prop, font)
 
-    def getInt(self, objectName: str):
-        try:
-            initialInt = int(getattr(self, objectName))
-        except:
-            initialInt = self._defaults[objectName]
+    def getInt(self, prop: str, minimum=1, maximum=50):
+        initial = self.getProperty(prop)
         i, accepted = QInputDialog.getInt(
             self,
             "Margin/Padding Settings",
-            "Enter a value between 1 and 50:",
-            value=initialInt,
-            min=1,
-            max=50,
+            f"Enter a value between {minimum} and {maximum}:",
+            value=initial,
+            min=minimum,
+            max=maximum,
             flags=Qt.CustomizeWindowHint | Qt.WindowTitleHint,
         )
-
         if accepted:
-            self.setProperty_(objectName, i)
+            self.setPropertyAndUpdate(prop, i)
