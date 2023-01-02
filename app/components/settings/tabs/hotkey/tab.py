@@ -61,12 +61,8 @@ class HotkeySettingsTab(BaseSettingsTab):
     # ------------------------------------- Settings ------------------------------------- #
 
     def saveSettings(self):
-        hotkeys = {}
         for container in self.containers:
-            hotkey, action = container.saveSettings()
-            if hotkey:
-                hotkeys[action] = hotkey
-        self.settings.setValue("hotkeys", hotkeys)
+            container.saveSettings()
         super().saveSettings()
         self.menu.onSaveHotkeys()
 

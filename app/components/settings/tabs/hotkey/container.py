@@ -90,10 +90,11 @@ class HotkeyContainer(BaseSettings):
     def saveSettings(self):
         hotkey = self.getHotkeyText()
         if not hotkey:
-            self.loadSettings()
-            return hotkey, self._shortcutName
-        super().saveSettings(hasMessage=False)
-        return hotkey, self._shortcutName
+            return self.loadSettings()
+        hotkeys = self.settings.value("hotkeys", {}, type=dict)
+        hotkeys[self._shortcutName] = hotkey
+        self.settings.setValue("hotkeys", hotkeys)
+        return super().saveSettings(hasMessage=False)
 
     # -------------------------------- Helpers Functions -------------------------------- #
 
