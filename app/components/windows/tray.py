@@ -87,42 +87,27 @@ class SystemTray(QSystemTrayIcon):
 
     def loadModel(self):
         def loadModelHelper():
-            import http.client as httplib
-
-            def isConnected(url="8.8.8.8"):
-                connection = httplib.HTTPSConnection(url, timeout=2)
-                try:
-                    connection.request("HEAD", "/")
-                    return True
-                except Exception:
-                    return False
-                finally:
-                    connection.close()
-
-            connected = isConnected()
-            if connected:
+            try:
                 self.showMessage("Please wait", "Loading the MangaOCR model ...")
                 self.ocrModel = MangaOcr()
-            return connected
+                return "success"
+            except Exception as e:
+                return str(e)
 
-        def modelLoadedConfirmation(connected):
-            if connected:
+        def loadModelConfirm(message: str):
+            if message.lower() == "success":
                 self.showMessage(
                     "MangaOCR model loaded",
                     "You are now using the MangaOCR model for Japanese text detection.",
                 )
-            elif not connected:
-                self.showMessage(
-                    "Connection Error",
-                    "Please try again or make sure your Internet connection is on.",
-                )
+            else:
+                self.showMessage("Load Model Error", message)
 
         worker = BaseWorker(loadModelHelper)
-        worker.signals.result.connect(modelLoadedConfirmation)
+        worker.signals.result.connect(loadModelConfirm)
         self.threadpool.start(worker)
 
     def startCapture(self):
-
         if self.ocrModel == None:
             self.showMessage(
                 "MangaOCR model not yet loaded",
