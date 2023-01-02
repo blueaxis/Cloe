@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from manga_ocr import MangaOcr
 from PyQt5.QtCore import QObject, QSettings, QThreadPool
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QApplication
+from PyQt5.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from .external import ExternalWindow
 from components.popups import AboutPopup
@@ -133,9 +133,9 @@ class SystemTray(QSystemTrayIcon):
         self.externalWindow.showFullScreen()
 
     def openSettings(self):
-        if not self.settingsMenu:
+        if self.settingsMenu is None:
             self.settingsMenu = SettingsMenu(self)
-            self.settingsMenu.show()
+        self.settingsMenu.show()
 
     def openAbout(self):
         AboutPopup().exec()
