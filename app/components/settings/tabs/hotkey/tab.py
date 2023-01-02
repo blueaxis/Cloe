@@ -31,8 +31,6 @@ class HotkeySettingsTab(BaseSettingsTab):
 
     def __init__(self, parent: QWidget):
         super().__init__(parent, "./utils/cloe-hotkey.ini")
-        # TODO: SettingsMenu is not being set as parent
-        self.menu = parent
 
         # Layout and margins
         self.setLayout(QGridLayout(self))
