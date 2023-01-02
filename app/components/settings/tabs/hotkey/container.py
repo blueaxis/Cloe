@@ -54,7 +54,7 @@ class HotkeyContainer(BaseSettings):
         self.initWidgets(shortcutLabel)
         self.loadSettings()
 
-    # -------------------------------- UI Initializations -------------------------------- #
+    # ------------------------------ UI Initializations ----------------------------- #
 
     def initWidgets(self, shortcutLabel: str):
         """
@@ -85,7 +85,7 @@ class HotkeyContainer(BaseSettings):
             self.layout().addWidget(modifier, alignment=Qt.AlignRight)
         self.layout().addWidget(self.mainKey, alignment=Qt.AlignRight)
 
-    # ------------------------------------- Settings ------------------------------------- #
+    # ----------------------------------- Settings ---------------------------------- #
 
     def saveSettings(self):
         hotkey = self.getHotkeyText()
@@ -95,7 +95,7 @@ class HotkeyContainer(BaseSettings):
         super().saveSettings(hasMessage=False)
         return hotkey, self._shortcutName
 
-    # -------------------------------- Helpers Functions -------------------------------- #
+    # ------------------------------ Helpers Functions ------------------------------ #
 
     def getHotkeyText(self):
         """

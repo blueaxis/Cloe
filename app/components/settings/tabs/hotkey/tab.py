@@ -41,7 +41,7 @@ class HotkeySettingsTab(BaseSettingsTab):
         self.layout().setRowStretch(self.layout().rowCount() - 1, 1)
         self.addButtonBar(self.layout().rowCount())
 
-    # -------------------------------- UI Initializations -------------------------------- #
+    # ------------------------------ UI Initializations ----------------------------- #
 
     def initializeHotkeyContainers(self):
         """Initialize HotkeyContainer widgets for the given actions
@@ -56,7 +56,7 @@ class HotkeySettingsTab(BaseSettingsTab):
             self.containers.append(HotkeyContainer(action))
             self.layout().addWidget(self.containers[-1])
 
-    # ------------------------------------- Settings ------------------------------------- #
+    # ----------------------------------- Settings ---------------------------------- #
 
     def saveSettings(self):
         hotkeys = {}

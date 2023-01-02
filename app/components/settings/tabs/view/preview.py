@@ -40,7 +40,7 @@ class Preview(QWidget):
     def setBackgroundColor(self, color: QColor):
         self.backgroundColor = color
 
-    # -------------------------------- UI Initializations -------------------------------- #
+    # ------------------------------ UI Initializations ----------------------------- #
 
     def createSelectionBand(self):
         self.rubberBand = RubberBand(self)
@@ -83,7 +83,7 @@ class Preview(QWidget):
         self.createAlphaBackground()
         return super().paintEvent(event)
 
-    # ----------------------------------- View Updates ----------------------------------- #
+    # --------------------------------- View Updates -------------------------------- #
 
     def resizeEvent(self, event: QResizeEvent):
         if self is not None:
