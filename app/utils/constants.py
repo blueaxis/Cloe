@@ -19,18 +19,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5.QtGui import QColor, QFont
 
-# General
+# ------------------------------------- General ------------------------------------- #
+
 APP_NAME = "Cloe"
 
-# Images and styles
+# Icons
 APP_LOGO = "./assets/images/icons/logo.ico"
+SETTINGS_ICON = "./assets/images/icons/settings.png"
+ABOUT_ICON = "./assets/images/icons/about.png"
+EXIT_ICON = "./assets/images/icons/exit.png"
+
+# Styles
 STYLESHEET_LIGHT = "./assets/styles.qss"
 STYLESHEET_DARK = "./assets/styles-dark.qss"
 STYLESHEET_DEFAULT = "./assets/styles.qss"
 
-# Settings
-## Defaults
-HOTKEYS_DEFAULT = {
+# ------------------------------------- Settings ------------------------------------ #
+
+# Config
+HOTKEY_CONFIG = "./utils/cloe-hotkey.ini"
+VIEW_CONFIG = "./utils/cloe-view.ini"
+
+# Defaults
+HOTKEY_DEFAULT = {
     "startCapture": {
         "shiftKey": "false",
         "ctrlKey": "false",
@@ -46,7 +57,7 @@ HOTKEYS_DEFAULT = {
         "mainKey": 0,
     },
 }
-VIEW_SETTINGS_DEFAULT = {
+VIEW_DEFAULT = {
     # Preview
     "previewFont": QFont("Arial", 16),
     "previewColor": QColor(239, 240, 241, 255),
@@ -58,7 +69,8 @@ VIEW_SETTINGS_DEFAULT = {
     "selectionBackground": QColor(0, 128, 255, 60),
     "windowColor": QColor(255, 255, 255, 13),
 }
-## Constants
+
+# Constants
 UNMAPPED_KEY = "<Unmapped>"
 VALID_KEY_LIST = [
     UNMAPPED_KEY,
@@ -89,6 +101,8 @@ VALID_KEY_LIST = [
     "Y",
     "Z",
 ]
+
+# --------------------------------------- Misc -------------------------------------- #
 
 # Popups
 ABOUT_MESSAGE = (

@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import QGridLayout, QWidget
 
 from ..tab import BaseSettingsTab
 from .container import HotkeyContainer
+from utils.constants import HOTKEY_CONFIG
 
 
 class HotkeySettingsTab(BaseSettingsTab):
@@ -30,7 +31,7 @@ class HotkeySettingsTab(BaseSettingsTab):
     """
 
     def __init__(self, parent: QWidget):
-        super().__init__(parent, "./utils/cloe-hotkey.ini")
+        super().__init__(parent, HOTKEY_CONFIG)
 
         # Layout and margins
         self.setLayout(QGridLayout(self))

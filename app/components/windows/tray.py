@@ -26,6 +26,13 @@ from .external import ExternalWindow
 from components.popups import AboutPopup
 from components.services import BaseWorker, Hotkeys
 from components.settings import SettingsMenu
+from utils.constants import (
+    ABOUT_ICON,
+    APP_LOGO,
+    EXIT_ICON,
+    HOTKEY_CONFIG,
+    SETTINGS_ICON,
+)
 
 
 class SystemTray(QSystemTrayIcon):
@@ -34,8 +41,7 @@ class SystemTray(QSystemTrayIcon):
     """
 
     def __init__(self, parent=None):
-        icon = QIcon("./assets/images/icons/logo.ico")
-        super().__init__(icon, parent)
+        super().__init__(QIcon(APP_LOGO), parent)
 
         # State trackers and configurations
         self.threadpool = QThreadPool()
@@ -47,16 +53,10 @@ class SystemTray(QSystemTrayIcon):
         self.setContextMenu(menu)
 
         # Menu Actions
-        menu.addAction(
-            QIcon("./assets/images/icons/settings.png"), "Settings", self.openSettings
-        )
+        menu.addAction(QIcon(SETTINGS_ICON), "Settings", self.openSettings)
         menu.addSeparator()
-        menu.addAction(
-            QIcon("./assets/images/icons/about.png"), "About Chloe", self.openAbout
-        )
-        menu.addAction(
-            QIcon("./assets/images/icons/exit.png"), "Exit", self.closeApplication
-        )
+        menu.addAction(QIcon(ABOUT_ICON), "About Chloe", self.openAbout)
+        menu.addAction(QIcon(EXIT_ICON), "Exit", self.closeApplication)
 
         self.settingsMenu = None
 
@@ -75,7 +75,7 @@ class SystemTray(QSystemTrayIcon):
 
     def getHotkeys(self):
         hotkeyDict = {}
-        hotkeySettings = QSettings("./utils/cloe-hotkey.ini", QSettings.IniFormat)
+        hotkeySettings = QSettings(HOTKEY_CONFIG, QSettings.IniFormat)
         hotkeys = hotkeySettings.value("hotkeys")
         if hotkeys:
             for action, hotkey in hotkeys.items():

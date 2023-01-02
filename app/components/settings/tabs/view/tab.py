@@ -33,6 +33,7 @@ from PyQt5.QtWidgets import (
 from ..tab import BaseSettingsTab
 from .container import ViewContainer
 from .preview import Preview
+from utils.constants import VIEW_CONFIG
 
 
 class ViewSettingsTab(ViewContainer, BaseSettingsTab):
@@ -42,7 +43,7 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
 
     def __init__(self, parent: QWidget):
 
-        super().__init__(parent, "./utils/cloe-view.ini")
+        super().__init__(parent, VIEW_CONFIG)
 
         self.setLayout(QGridLayout(self))
         self.initButtons()

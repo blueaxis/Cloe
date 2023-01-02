@@ -23,7 +23,7 @@ from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget
 
 from ..base import BaseSettings
-from utils.constants import VIEW_SETTINGS_DEFAULT
+from utils.constants import VIEW_DEFAULT, VIEW_CONFIG
 from utils.scripts import colorToRGBA
 
 
@@ -32,9 +32,9 @@ class ViewContainer(BaseSettings):
     Generic container to handle view updates
     """
 
-    def __init__(self, parent: QWidget, file="./utils/cloe-view.ini"):
+    def __init__(self, parent: QWidget, file=VIEW_CONFIG):
         super().__init__(parent, file)
-        self._defaults = VIEW_SETTINGS_DEFAULT
+        self._defaults = VIEW_DEFAULT
         self._types = {"previewPadding": int, "selectionBorderThickness": int}
         self.loadSettings()
 
