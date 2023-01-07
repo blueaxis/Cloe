@@ -17,12 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import Qt, QSettings
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGridLayout, QWidget
 
-from ..base import BaseSettingsTab
+from ..tab import BaseSettingsTab
 from .container import HotkeyContainer
-from components.popups import BasePopup
 
 
 class HotkeySettingsTab(BaseSettingsTab):
@@ -31,10 +30,9 @@ class HotkeySettingsTab(BaseSettingsTab):
     """
 
     def __init__(self, parent: QWidget):
-        super().__init__(parent)
+        super().__init__(parent, "./utils/cloe-hotkey.ini")
         # TODO: SettingsMenu is not being set as parent
         self.menu = parent
-        self.settings = QSettings("./utils/cloe-hotkey.ini", QSettings.IniFormat)
 
         # Layout and margins
         self.setLayout(QGridLayout(self))
@@ -54,7 +52,7 @@ class HotkeySettingsTab(BaseSettingsTab):
         (converted to TitleCase separated by whitespace).
         """
 
-        self.containers = []
+        self.containers: list[HotkeyContainer] = []
         actions = ["Start Capture", "Open Settings", "Close Application"]
         for action in actions:
             self.containers.append(HotkeyContainer(action))
@@ -63,14 +61,9 @@ class HotkeySettingsTab(BaseSettingsTab):
     # ------------------------------------- Settings ------------------------------------- #
 
     def saveSettings(self):
-        hotkeys = {}
         for container in self.containers:
-            hotkey, action = container.saveSettings()
-            hotkeys[action] = hotkey
-        # TODO: Save config in HotkeyContainer instead
-        self.settings.setValue("hotkeys", hotkeys)
-        message = BasePopup("Configuration Saved", "New shortcuts have been applied.")
-        message.exec()
+            container.saveSettings()
+        super().saveSettings()
         self.menu.onSaveHotkeys()
 
     def loadSettings(self):

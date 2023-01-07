@@ -19,43 +19,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Optional
 
-from PyQt5.QtCore import QSettings
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QWidget
 
+from ..base import BaseSettings
 from utils.constants import VIEW_SETTINGS_DEFAULT
 from utils.scripts import colorToRGBA
 
 
-class ViewContainer(QWidget):
+class ViewContainer(BaseSettings):
     """
-    Generic view container
+    Generic container to handle view updates
     """
 
-    def __init__(self, parent: QWidget):
-        super().__init__(parent)
-
-        self.loadSettings()
-
-    # ------------------------------------- Settings ------------------------------------- #
-
-    def loadSettings(self, file="./utils/cloe-view.ini"):
-        """Load the settings from the configuration file
-
-        Args:
-            file (str, optional): Path to configuration file.
-            Defaults to "./utils/cloe-view.ini".
-        """
-        self.settings = QSettings(file, QSettings.IniFormat)
-        # Default settings if not provided by config
+    def __init__(self, parent: QWidget, file="./utils/cloe-view.ini"):
+        super().__init__(parent, file)
         self._defaults = VIEW_SETTINGS_DEFAULT
-        for propName, propDefault in self._defaults.items():
-            prop = self.settings.value(propName, propDefault)
-            if isinstance(prop, str):
-                prop = int(prop)
-            setattr(self, propName, prop)
-
-    # ----------------------------------- View Updates ----------------------------------- #
+        self._types = {"previewPadding": int, "selectionBorderThickness": int}
+        self.loadSettings()
 
     def getPreviewTextStyles(
         self, font: QFont, padding: int, color: QColor, background: QColor
@@ -87,7 +68,6 @@ class ViewContainer(QWidget):
         Args:
             view (QWidget, optional): The view to be updated. Defaults to None.
         """
-        # Update preview text style
         styles = self.getPreviewTextStyles(
             self.previewFont,
             self.previewPadding,

@@ -17,25 +17,31 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from typing import Union
+from typing import Any
 
-from PyQt5.QtCore import Qt, QSettings
-from PyQt5.QtWidgets import QHBoxLayout, QWidget, QLabel, QComboBox, QCheckBox
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QCheckBox, QComboBox, QHBoxLayout, QLabel
 
+from ..base import BaseSettings
 from utils.constants import HOTKEYS_DEFAULT, UNMAPPED_KEY, VALID_KEY_LIST
 from utils.scripts import camelizeText
 
 
-class HotkeyContainer(QWidget):
+class HotkeyContainer(BaseSettings):
     """Generic container for hotkey settings component
 
     Args:
-        shortcutName (str): Name of the shortcut.
-        Based on the name of the callable in the system tray application.
+        shortcutLabel (str): Text based on the name of the callable in the system tray application.
     """
 
-    def __init__(self, shortcutName: str):
-        super().__init__()
+    def __init__(self, shortcutLabel: str):
+        self._shortcutName = camelizeText(shortcutLabel)
+        super().__init__(None, "./utils/cloe-hotkey.ini", self._shortcutName)
+
+        try:
+            self._defaults = HOTKEYS_DEFAULT[self._shortcutName]
+        except KeyError:
+            self._defaults = HOTKEYS_DEFAULT["unmapped"]
 
         # Layout
         self.setLayout(QHBoxLayout(self))
@@ -45,16 +51,16 @@ class HotkeyContainer(QWidget):
         margin.setTop(7)
         self.layout().setContentsMargins(margin)
 
-        self.initWidgets(shortcutName)
+        self.initWidgets(shortcutLabel)
         self.loadSettings()
 
     # -------------------------------- UI Initializations -------------------------------- #
 
-    def initWidgets(self, shortcutName: str):
+    def initWidgets(self, shortcutLabel: str):
         """
         Initialize checkboxes for the modifiers and combobox for the main key
         """
-        self.shortcutLabel = QLabel(shortcutName)
+        self.shortcutLabel = QLabel(shortcutLabel)
 
         # Modifiers
         self.shiftKey = QCheckBox("Shift")
@@ -82,8 +88,19 @@ class HotkeyContainer(QWidget):
     # ------------------------------------- Settings ------------------------------------- #
 
     def saveSettings(self):
+        hotkey = self.getHotkeyText()
+        if not hotkey:
+            return self.loadSettings()
+        hotkeys = self.settings.value("hotkeys", {}, type=dict)
+        hotkeys[self._shortcutName] = hotkey
+        self.settings.setValue("hotkeys", hotkeys)
+        return super().saveSettings(hasMessage=False)
+
+    # -------------------------------- Helpers Functions -------------------------------- #
+
+    def getHotkeyText(self):
         """
-        Save configuration based on current widget states
+        Computes hotkey combination text based on checkbox and combobox states
         """
         modifierText = ""
         for modifier in self.modifiers:
@@ -91,53 +108,25 @@ class HotkeyContainer(QWidget):
                 modifierText += f"<{modifier.text()}>+"
 
         key = self.mainKey.currentText()
-        # TODO: Do not save hotkey if unmapped
         if key == UNMAPPED_KEY:
-            key = ""
+            return ""
         modifierText += key
+        return modifierText
 
-        shortcutName = camelizeText(self.shortcutLabel.text())
-        self.settings.setValue(shortcutName, self.getContainerState())
-        return modifierText, shortcutName
-
-    def loadSettings(self, file="./utils/cloe-hotkey.ini"):
-        """Load the settings from the configuration file
-
-        Args:
-            file (str, optional): Path to configuration file.
-            Defaults to "./utils/cloe-hotkey.ini".
-        """
-        self.settings = QSettings(file, QSettings.IniFormat)
-
-        # Properties and defaults
-        shortcutName = camelizeText(self.shortcutLabel.text())
-        try:
-            self._defaults = HOTKEYS_DEFAULT[shortcutName]
-        except KeyError:
-            self._defaults = HOTKEYS_DEFAULT["unmapped"]
-
-        shortcut = self.settings.value(shortcutName, self._defaults, type=dict)
-        for propName, propDefault in shortcut.items():
-            self.setWidgetState(propName, propDefault)
-
-    # -------------------------------- Helpers Functions -------------------------------- #
-
-    def getContainerState(self):
-        state = {}
-        for propName, _ in self._defaults.items():
-            state[propName] = self.getWidgetState(propName)
-        return state
-
-    def getWidgetState(self, objectName: str):
-        obj = getattr(self, objectName)
+    def getProperty(self, prop: str):
+        # Overridden to handle checkbox and combobox
+        obj = getattr(self, prop)
         if isinstance(obj, QCheckBox):
             return obj.isChecked()
         elif isinstance(obj, QComboBox):
             return obj.currentIndex()
+        return super().getProperty(prop)
 
-    def setWidgetState(self, objectName: str, objectState: Union[bool, int] = 0):
-        obj = getattr(self, objectName)
+    def setProperty(self, prop: str, value: Any):
+        # Overridden to handle checkbox and combobox
+        obj = getattr(self, prop)
         if isinstance(obj, QCheckBox):
-            obj.setChecked(objectState)
+            return obj.setChecked(value.lower() == "true")
         elif isinstance(obj, QComboBox):
-            obj.setCurrentIndex(objectState)
+            return obj.setCurrentIndex(int(value))
+        return super().setProperty(prop, value)
