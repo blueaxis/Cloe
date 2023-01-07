@@ -33,6 +33,7 @@ from PyQt5.QtWidgets import (
 from ..tab import BaseSettingsTab
 from .container import ViewContainer
 from .preview import Preview
+from utils.constants import VIEW_CONFIG
 
 
 class ViewSettingsTab(ViewContainer, BaseSettingsTab):
@@ -42,7 +43,7 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
 
     def __init__(self, parent: QWidget):
 
-        super().__init__(parent, "./utils/cloe-view.ini")
+        super().__init__(parent, VIEW_CONFIG)
 
         self.setLayout(QGridLayout(self))
         self.initButtons()
@@ -50,14 +51,14 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
         self.updateViewStyles()
         self.addButtonBar(self.layout().rowCount())
 
-    # -------------------------------- UI Initializations -------------------------------- #
+    # ------------------------------ UI Initializations ----------------------------- #
 
     def initButtons(self):
         """
         Initialize controls for the preview
         """
 
-        # ------------------------------- Preview Text ------------------------------- #
+        # ------------------------------- Preview Text ------------------------------ #
 
         # Button Initializations
         _previewTitle = QLabel("Preview ")
@@ -79,7 +80,7 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
         _previewFont.clicked.connect(lambda: self.getFont("previewFont"))
         _previewPadding.clicked.connect(lambda: self.getInt("previewPadding"))
 
-        # --------------------------- Selection Rubberband --------------------------- #
+        # --------------------------- Selection Rubberband -------------------------- #
 
         # Button Initializations
         _selectionTitle = QLabel("Selection ")
@@ -112,14 +113,14 @@ class ViewSettingsTab(ViewContainer, BaseSettingsTab):
         self.layout().addWidget(self._preview, 2, 0, 1, -1)
         self.layout().setRowStretch(self.layout().rowCount() - 1, 1)
 
-    # ------------------------------------- Settings ------------------------------------- #
+    # ----------------------------------- Settings ---------------------------------- #
 
     def resetSettings(self):
         # Overridden to update styles on reset
         super().resetSettings()
         self.updateViewStyles()
 
-    # --------------------------- Property Setters and Getters --------------------------- #
+    # ------------------------- Property Setters and Getters ------------------------ #
 
     def setPropertyAndUpdate(self, prop: str, value: Any):
         super().setProperty(prop, value)

@@ -23,7 +23,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QCheckBox, QComboBox, QHBoxLayout, QLabel
 
 from ..base import BaseSettings
-from utils.constants import HOTKEYS_DEFAULT, UNMAPPED_KEY, VALID_KEY_LIST
+from utils.constants import HOTKEY_DEFAULT, HOTKEY_CONFIG, UNMAPPED_KEY, VALID_KEY_LIST
 from utils.scripts import camelizeText
 
 
@@ -36,12 +36,12 @@ class HotkeyContainer(BaseSettings):
 
     def __init__(self, shortcutLabel: str):
         self._shortcutName = camelizeText(shortcutLabel)
-        super().__init__(None, "./utils/cloe-hotkey.ini", self._shortcutName)
+        super().__init__(None, HOTKEY_CONFIG, self._shortcutName)
 
         try:
-            self._defaults = HOTKEYS_DEFAULT[self._shortcutName]
+            self._defaults = HOTKEY_DEFAULT[self._shortcutName]
         except KeyError:
-            self._defaults = HOTKEYS_DEFAULT["unmapped"]
+            self._defaults = HOTKEY_DEFAULT["unmapped"]
 
         # Layout
         self.setLayout(QHBoxLayout(self))
@@ -54,7 +54,7 @@ class HotkeyContainer(BaseSettings):
         self.initWidgets(shortcutLabel)
         self.loadSettings()
 
-    # -------------------------------- UI Initializations -------------------------------- #
+    # ------------------------------ UI Initializations ----------------------------- #
 
     def initWidgets(self, shortcutLabel: str):
         """
@@ -85,7 +85,7 @@ class HotkeyContainer(BaseSettings):
             self.layout().addWidget(modifier, alignment=Qt.AlignRight)
         self.layout().addWidget(self.mainKey, alignment=Qt.AlignRight)
 
-    # ------------------------------------- Settings ------------------------------------- #
+    # ----------------------------------- Settings ---------------------------------- #
 
     def saveSettings(self):
         hotkey = self.getHotkeyText()
@@ -96,7 +96,7 @@ class HotkeyContainer(BaseSettings):
         self.settings.setValue("hotkeys", hotkeys)
         return super().saveSettings(hasMessage=False)
 
-    # -------------------------------- Helpers Functions -------------------------------- #
+    # ------------------------------ Helpers Functions ------------------------------ #
 
     def getHotkeyText(self):
         """

@@ -49,7 +49,7 @@ class BaseOCRView(QGraphicsView):
 
         self.pixmap = QPixmap()
 
-    # -------------------------------------- Mouse -------------------------------------- #
+    # ------------------------------------ Mouse ------------------------------------ #
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -97,7 +97,7 @@ class BaseOCRView(QGraphicsView):
         self._timer.timeout.disconnect(self.rubberBandStopped)
         QThreadPool.globalInstance().start(worker)
 
-    # -------------------------------------- Close -------------------------------------- #
+    # ------------------------------------ Close ------------------------------------ #
 
     def closeEvent(self, event):
         # Ensure that object is deleted before closing

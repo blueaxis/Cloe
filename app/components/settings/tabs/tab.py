@@ -30,8 +30,10 @@ class BaseSettingsTab(BaseSettings):
         parent (QWidget): Parent widget. Set to SettingsMenu object.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent: QWidget, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+        # Manually set menu since QTabWidget children is reparented
+        self.menu = parent
 
     def addButtonBar(self, row: int):
         """
@@ -46,7 +48,7 @@ class BaseSettingsTab(BaseSettings):
         self.resetButton = QPushButton("Restore Defaults")
 
         self.saveButton.clicked.connect(lambda: self.saveSettings())
-        self.closeButton.clicked.connect(self.parent().close)
+        self.closeButton.clicked.connect(self.menu.close)
         self.resetButton.clicked.connect(self.confirmResetSettings)
 
         buttonBar.layout().addWidget(self.resetButton)

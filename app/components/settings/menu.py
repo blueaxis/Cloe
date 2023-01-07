@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTabWidget
 
 from .tabs import ViewSettingsTab, HotkeySettingsTab
@@ -30,10 +29,8 @@ class SettingsMenu(QWidget):
 
     def __init__(self, parent):
         super().__init__()
-        # Manually set parent since QSystemTrayIcon is not a QWidget
-        self.parent = parent
-        # TODO: Menu is not being deleted
-        self.setAttribute(Qt.WA_DeleteOnClose)
+        # Manually set system tray since QSystemTrayIcon is not a QWidget
+        self.systemTray = parent
 
         self.tabs = QTabWidget()
         self.tabs.addTab(HotkeySettingsTab(self), "HOTKEYS")
@@ -44,4 +41,4 @@ class SettingsMenu(QWidget):
         self.setFixedSize(625, 400)
 
     def onSaveHotkeys(self):
-        self.parent.loadHotkeys()
+        self.systemTray.loadHotkeys()
