@@ -17,8 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from PyQt5.QtCore import Qt, QThreadPool, QTimer, QPoint, QRect, QSize, pyqtSlot
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QPoint, QRect, QSize, QThreadPool, QTimer, Qt, pyqtSlot
+from PyQt5.QtGui import QCursor, QPixmap
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QLabel, QWidget
 
 from components.misc import RubberBand
@@ -48,6 +48,36 @@ class BaseOCRView(QGraphicsView):
         self._ocrText.setObjectName("previewText")
 
         self.pixmap = QPixmap()
+
+        self.activeScreenIndex = 0
+
+    # ------------------------------------ Screen ----------------------------------- #
+
+    def getActiveScreenIndex(self):
+        cursor = QCursor.pos()
+        index = QApplication.desktop().screenNumber(cursor)
+        self.activeScreenIndex = index
+        return index
+
+    def captureScreen(self, index: int):
+        screen = QApplication.screens()[index]
+        s = screen.size()
+        self.pixmap = screen.grabWindow(0).scaled(s.width(), s.height())
+
+    @pyqtSlot()
+    def rubberBandStopped(self):
+        if self._ocrText.isHidden():
+            self._ocrText.setText("")
+            self._ocrText.adjustSize()
+            self._ocrText.show()
+
+        self.captureScreen(self.activeScreenIndex)
+        pixmap = self.pixmap.copy(self.rubberBand.geometry())
+
+        worker = BaseWorker(pixmapToText, pixmap, self.parent().ocrModel)
+        worker.signals.result.connect(self.ocrFinished)
+        self._timer.timeout.disconnect(self.rubberBandStopped)
+        QThreadPool.globalInstance().start(worker)
 
     # ------------------------------------ Mouse ------------------------------------ #
 
@@ -79,29 +109,12 @@ class BaseOCRView(QGraphicsView):
 
         super().mouseReleaseEvent(event)
 
-    @pyqtSlot()
-    def rubberBandStopped(self):
-
-        if self._ocrText.isHidden():
-            self._ocrText.setText("")
-            self._ocrText.adjustSize()
-            self._ocrText.show()
-
-        screen = QApplication.primaryScreen()
-        s = screen.size()
-        self.pixmap = screen.grabWindow(0).scaled(s.width(), s.height())
-        pixmap = self.pixmap.copy(self.rubberBand.geometry())
-
-        worker = BaseWorker(pixmapToText, pixmap, self.parent().ocrModel)
-        worker.signals.result.connect(self.ocrFinished)
-        self._timer.timeout.disconnect(self.rubberBandStopped)
-        QThreadPool.globalInstance().start(worker)
-
     # ------------------------------------ Close ------------------------------------ #
 
     def closeEvent(self, event):
         # Ensure that object is deleted before closing
         self.deleteLater()
+        self.rubberBand.hide()
         return super().closeEvent(event)
 
     def ocrFinished(self, text):

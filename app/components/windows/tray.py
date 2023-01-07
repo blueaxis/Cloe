@@ -58,6 +58,7 @@ class SystemTray(QSystemTrayIcon):
         menu.addAction(QIcon(ABOUT_ICON), "About Chloe", self.openAbout)
         menu.addAction(QIcon(EXIT_ICON), "Exit", self.closeApplication)
 
+        self.externalWindow = None
         self.settingsMenu = None
 
     def processGlobalHotkey(self, objectMethod: tuple[QObject, str]):
@@ -114,8 +115,10 @@ class SystemTray(QSystemTrayIcon):
                 "Please wait until the MangaOCR model is loaded.",
             )
             return
-        self.externalWindow = ExternalWindow(self)
-        self.externalWindow.showFullScreen()
+        if self.externalWindow is None:
+            self.externalWindow = ExternalWindow(self)
+        if not self.externalWindow.isVisible():
+            self.externalWindow.showFullScreen()
 
     def openSettings(self):
         if self.settingsMenu is None:

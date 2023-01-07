@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCloseEvent, QCursor
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QDesktopWidget, QMainWindow
 
 from components.views import FullScreenView
 
@@ -36,21 +36,42 @@ class ExternalWindow(QMainWindow):
 
     def __init__(self, parent: "SystemTray"):
         super().__init__()
+        self.systemTray = parent
 
-        # Layout and styles
+        # By setting the border thickness and margin to zero,
+        # we ensure that the whole screen is captured.
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("border:0px; margin:0px")
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Popup)
+
+        # Enables the widget to have a transparent background.
         self.setAttribute(Qt.WA_NoSystemBackground)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        QApplication.setOverrideCursor(QCursor(Qt.CrossCursor))
+
+        # FramelessWindowHint flag also enables transparent background.
+        # WindowStaysOnTopHint & Popup flags ensures that the widget is the top window.
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Popup)
 
         self.setCentralWidget(FullScreenView(self))
         self.ocrModel = parent.ocrModel
 
+    def showFullScreen(self):
+        # Overridden to show on the active screen
+        fullscreen: FullScreenView = self.centralWidget()
+        screenIndex = fullscreen.getActiveScreenIndex()
+
+        # TODO: Find an alternative way to show the active screen,
+        # since QDesktopWidget is obsolete according to Qt docs
+        screen = QDesktopWidget().screenGeometry(screenIndex)
+        self.move(screen.left(), screen.top())
+
+        QApplication.setOverrideCursor(QCursor(Qt.CrossCursor))
+
+        return super().showFullScreen()
+
     def closeEvent(self, event: QCloseEvent):
         # Ensure that object is deleted before closing
         self.deleteLater()
+        self.systemTray.externalWindow = None
         # Restore cursor
         QApplication.restoreOverrideCursor()
         return super().closeEvent(event)
