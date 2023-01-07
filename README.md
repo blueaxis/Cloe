@@ -7,6 +7,7 @@
 
 <p align="center"> Snipping utility for the MangaOCR model </p>
 
+
 ## Contents
 - [About](#about)
 - [User Guide](#user_guide)
@@ -18,13 +19,12 @@ Inspired by [Capture2Text](http://capture2text.sourceforge.net/), Cloe is a snip
 
 https://user-images.githubusercontent.com/45705751/166183555-ef11bf64-9cea-4c04-8a71-2293065d644c.mp4
 
+
 ## User Guide  <a name="user_guide"></a>
 Launch the application and wait for the model to load. Show the snipping window using shortcut `Alt+Q` and drag and hold the mouse cursor to start performing OCR.
 
 ### Installation <a name = "installation"></a>
 Download the latest zip file [here](https://github.com/bluaxees/Cloe/releases/latest/). Decompress the file in the desired directory. Make sure that the `app` folder is in the same folder as the shortcut `Cloe`.
-
-For developers, clone this repo and install requirements: `pip install -r requirements.txt`. Run the app in the command line using `python main.py`. 
 
 ### System Requirements
 
@@ -32,7 +32,12 @@ Recommended:
 - Hard drive: at least 700 MB HD space
 - RAM: at least 2 GB (recommended)
 
-For developers, the following Python versions are supported: 3.7, 3.8, and 3.9.
+### Development Setup
+ - Install [poetry](https://python-poetry.org/docs/#installation) on a supported Python version (3.8, 3.9).
+ - Clone this repo and install dependencies by running: `poetry install --with dev`.
+ - In the `app` directory, use `python main.py` to run the app.
+ - If you want to build the app locally, run `pyinstaller main.spec` in the `build` directory.
+
 
 ## Acknowledgements <a name = "acknowledgements"></a>
 This project will not be possible without the MangaOCR model by [Maciej Budyś](https://github.com/kha-white).
